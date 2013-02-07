@@ -106,15 +106,13 @@ def test_script_load_inventory_1():
 
     assert exit_code == 0, 'non zero exit code %s' % exit_code
 
-def test_script_load_inventory_1():
+def test_script_load_inventory_2():
     #tests for empty lines at the end of files 
     scriptpath = 'bin/load-inventory'
     module = imp.load_source('llt', scriptpath)
     exit_code = module.main([scriptpath, 'test-data/inventory-data-2.txt'])
 
     assert exit_code == 0, 'non zero exit code %s' % exit_code
-
-
     
 def test_get_liquor_inventory():
     db._reset_db()

@@ -23,14 +23,15 @@ def load_bottle_types(fp):
     Returns number of bottle types loaded
     """
     reader = csv.reader(fp)
+    new_reader = data_reader(fp)
 
     x = []
     n = 0
-    for line in reader:
-        if not line:     #added this conditional for the empty lines
-            continue    #strip() didn't work 
-        if line[0].startswith('#'):
-            continue
+    for line in new_reader:
+        #if not line:     #added this conditional for the empty lines
+        #    continue    #strip() didn't work 
+        #if line[0].startswith('#'):
+        #    continue
         
         (mfg, name, typ) = line
         n += 1
@@ -65,3 +66,14 @@ def load_inventory(fp):
         db.add_to_inventory(mfg, name, amount)
     
     return n
+
+def data_reader(fp):
+    reader = csv.reader(fp)
+
+    for line in reader:
+        if not line:
+            continue
+        if line[0].startswith('#'):
+            continue
+        yield line
+
