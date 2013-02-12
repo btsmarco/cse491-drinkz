@@ -69,3 +69,11 @@ def get_liquor_inventory():
     "Retrieve all liquor types in inventory, in tuple form: (mfg, liquor)."
     for (m, l, _) in _inventory_db:
         yield m, l
+
+def show_liquor_amounts():
+    "Print all the liquor types and amounts in the inventory. "
+    print 'Manufacturer\tLiquor\t\tAmount'
+    print '------------\t------\t\t------'
+    for (mfg, liquor, _) in _bottle_types_db:
+        print "%s\t%s\t%d"%(mfg, liquor, get_liquor_amount(mfg, liquor))
+
