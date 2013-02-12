@@ -1,7 +1,7 @@
 """
 Database functionality for drinkz information.
 """
-
+import math
 # private singleton variables at module level
 _bottle_types_db = []
 _inventory_db = []
@@ -15,6 +15,9 @@ def _reset_db():
 # exceptions in Python inherit from Exception and generally don't need to
 # override any methods.
 class LiquorMissing(Exception):
+    pass
+
+class CorruptLine(Exception):
     pass
 
 def add_bottle_type(mfg, liquor, typ):
@@ -46,12 +49,21 @@ def check_inventory(mfg, liquor):
 
 def get_liquor_amount(mfg, liquor):
     "Retrieve the total amount of any given liquor currently in inventory."
-    amounts = []
+    amounts = 0 #ml
     for (m, l, amount) in _inventory_db:
         if mfg == m and liquor == l:
-            amounts.append(amount)
+            if("ml") in amount:
+                amount = amount.strip('ml')
+                amount = amount.strip()
+                amounts += int(amount)
+            elif("oz") in amount:
+                amount = amount.strip('oz')
+                amount = amount.strip()
+                amounts += math.floor(int(amount)*29.57) #1 oz = 29.57 ml
+            else:
+                pass
 
-    return amounts[0]
+    return amounts
 
 def get_liquor_inventory():
     "Retrieve all liquor types in inventory, in tuple form: (mfg, liquor)."

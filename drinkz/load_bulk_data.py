@@ -32,6 +32,10 @@ def load_bottle_types(fp):
         #    continue    #strip() didn't work 
         #if line[0].startswith('#'):
         #    continue
+
+        if  len(line) != 3:
+            err = "not enough inputs or not the right format"
+            raise db.CorruptLine(err)
         
         (mfg, name, typ) = line
         n += 1
