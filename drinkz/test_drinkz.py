@@ -48,9 +48,9 @@ def test_get_liquor_amount_1():
     db.add_bottle_type('Johnnie Walker', 'Black Label', 'blended scotch')
     db.add_to_inventory('Johnnie Walker', 'Black Label', '1000 ml')
     db.add_to_inventory('Johnnie Walker', 'Black Label', '2000 ml')
-    db.add_to_inventory('Johnnie Walker', 'Black Label', '20 oz')
+    db.add_to_inventory('Johnnie Walker', 'Black Label', '10 oz')
     amount = db.get_liquor_amount('Johnnie Walker', 'Black Label')
-    assert amount == 3591, amount
+    assert amount == 3295.735, amount
 
 def test_bulk_load_inventory_1():
     db._reset_db()
@@ -69,12 +69,12 @@ def test_get_liquor_amount_2():
 
     db.add_bottle_type('Johnnie Walker', 'Black Label', 'blended scotch')
     
-    data = "Johnnie Walker,Black Label,1000 ml"
+    data = "Johnnie Walker,Black Label,1000.54 ml"
     fp = StringIO(data)                 # make this look like a file handle
     n = load_bulk_data.load_inventory(fp)
 
     amount = db.get_liquor_amount('Johnnie Walker', 'Black Label')
-    assert amount == 1000, amount
+    assert amount == 1000.54, amount
 
 def test_bulk_load_bottle_types_1():
     db._reset_db()
