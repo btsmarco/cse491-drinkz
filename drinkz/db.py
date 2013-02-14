@@ -42,22 +42,33 @@ def add_to_inventory(mfg, liquor, amount):
             if("ml") in amount:
                 amount = amount.strip('ml')
                 amount = amount.strip()
-                amounts += int(amount)
+                amounts += float(amount)
             elif("oz") in amount:
                 amount = amount.strip('oz')
                 amount = amount.strip()
-                amounts += math.floor(int(amount)*29.57)#1 oz=29.57ml
+                amounts += (float(amount)*29.5735)#1 oz=29.57ml
+            elif("gallon") in amount:
+                amount = amount.strip('gallon')
+                amount = amount.strip()
+                amounts += (float(amount)*3785.41)#1 oz=29.57ml
+
             _inventory_db[(mfg, liquor)] = amounts 
         else:
             amounts = 0
             if("ml") in amount:
                 amount = amount.strip('ml')
                 amount = amount.strip()
-                amounts += int(amount)
+                amounts += float(amount)
             elif("oz") in amount:
                 amount = amount.strip('oz')
                 amount = amount.strip()
-                amounts += math.floor(int(amount)*29.57)#1 oz=29.57ml
+                amounts += (float(amount)*29.5735)#1 oz=29.57ml
+            elif("gallon") in amount:
+                amount = amount.strip('gallon')
+                amount = amount.strip()
+                amounts += (float(amount)*3785.41)#1 oz=29.57ml
+
+
             _inventory_db[(mfg, liquor)] = amounts 
 
     # just add it to the inventory database as a tuple, for now.
