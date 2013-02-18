@@ -1,10 +1,14 @@
 """
 Database functionality for drinkz information.
+I have choosen to store recipes in dictionaries, because it is very
+easy to get the ingredients of a recipe simply by using its name as 
+a key and the recipe as a value. 
 """
 import math
 # private singleton variables at module level
 _bottle_types_db = set([])
 _inventory_db = {}
+_recipes_db = {}
 
 def _reset_db():
     "A method only to be used during testing -- toss the existing db info."
@@ -99,3 +103,22 @@ def show_liquor_amounts():
     print '------------\t------\t\t------'
     for (mfg, liquor, _) in _bottle_types_db:
         print "%s\t%s\t%d"%(mfg, liquor, get_liquor_amount(mfg, liquor))
+
+def add_recipe(r):
+    """adding the recipe into the dictionary of recipes with
+    name as key and the recipe as a value"""
+    return 0
+
+def get_recipe(name):
+    """ returns the recipe"""
+    return 0
+
+def get_all_recipe():
+    """ returns the whole dictionary of recipes or a list of recipes"""
+    return 0
+
+def convert_to_ml(oz):
+    return 0
+
+def check_inventory_for_type():
+    return 0
