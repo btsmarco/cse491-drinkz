@@ -5,6 +5,8 @@ easy to get the ingredients of a recipe simply by using its name as
 a key and the recipe as a value. 
 """
 import math
+from recipes import Recipe
+
 # private singleton variables at module level
 _bottle_types_db = set([])
 _inventory_db = {}
@@ -12,9 +14,10 @@ _recipes_db = {}
 
 def _reset_db():
     "A method only to be used during testing -- toss the existing db info."
-    global _bottle_types_db, _inventory_db
+    global _bottle_types_db, _inventory_db , _recipes_db
     _bottle_types_db = set([])
     _inventory_db = {}
+    _recipes_db = {}
 
 # exceptions in Python inherit from Exception and generally don't need to
 # override any methods.
@@ -43,37 +46,13 @@ def add_to_inventory(mfg, liquor, amount):
     else:
         if (mfg, liquor) in _inventory_db:
             amounts = _inventory_db[(mfg, liquor)] 
-            if("ml") in amount:
-                amount = amount.strip('ml')
-                amount = amount.strip()
-                amounts += float(amount)
-            elif("oz") in amount:
-                amount = amount.strip('oz')
-                amount = amount.strip()
-                amounts += (float(amount)*29.5735)#1 oz=29.57ml
-            elif("gallon") in amount:
-                amount = amount.strip('gallon')
-                amount = amount.strip()
-                amounts += (float(amount)*3785.41)#1 oz=29.57ml
+            num = convert_to_ml(amount)
 
-            _inventory_db[(mfg, liquor)] = amounts 
+            _inventory_db[(mfg, liquor)] = amounts + num 
         else:
-            amounts = 0
-            if("ml") in amount:
-                amount = amount.strip('ml')
-                amount = amount.strip()
-                amounts += float(amount)
-            elif("oz") in amount:
-                amount = amount.strip('oz')
-                amount = amount.strip()
-                amounts += (float(amount)*29.5735)#1 oz=29.57ml
-            elif("gallon") in amount:
-                amount = amount.strip('gallon')
-                amount = amount.strip()
-                amounts += (float(amount)*3785.41)#1 oz=29.57ml
+            num = convert_to_ml(amount)
 
-
-            _inventory_db[(mfg, liquor)] = amounts 
+            _inventory_db[(mfg, liquor)] = num
 
     # just add it to the inventory database as a tuple, for now.
     #_inventory_db.append((mfg, liquor, amount))
@@ -107,18 +86,54 @@ def show_liquor_amounts():
 def add_recipe(r):
     """adding the recipe into the dictionary of recipes with
     name as key and the recipe as a value"""
-    return 0
+    if (r.name not in _recipes_db.keys()):
+        _recipes_db[r.name] = r
 
 def get_recipe(name):
-    """ returns the recipe"""
-    return 0
+    """returns a recipe"""
+    if(name in _recipes_db.keys()):
+        return _recipes_db[name]
+    else:
+        return 0
 
-def get_all_recipe():
+def get_all_recipes():
     """ returns the whole dictionary of recipes or a list of recipes"""
+    for n, r in _recipes_db.iteritems():
+        yield r
+
+def convert_to_ml(amount):
+    if("ml") in amount:
+        amount = amount.strip('ml')
+        amount = amount.strip()
+        result = float(amount)
+    elif("oz") in amount:
+        amount = amount.strip('oz')
+        amount = amount.strip()
+        result = (float(amount)*29.5735)#1 oz=29.57ml
+    elif("gallon") in amount:
+        amount = amount.strip('gallon')
+        amount = amount.strip()
+        result = (float(amount)*3785.41)
+    elif("liter") in amount:
+        amount = amount.strip('liter')
+        amount = amount.strip()
+        result = (float(amount)*1000)
+    else:
+        assert 0, amount
+
+    return result 
+
+
     return 0
 
-def convert_to_ml(oz):
-    return 0
+def check_inventory_for_type(typ):
+    max_amount = 0
+    for (M,L,T) in _bottle_types_db:
+        if (T == typ):
+            I_amount = get_liquor_amount(M,L)
+            if (max_amount < I_amount):
+                max_amount = I_amount
 
-def check_inventory_for_type():
-    return 0
+    return max_amount 
+
+
