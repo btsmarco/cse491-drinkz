@@ -24,6 +24,9 @@ def _reset_db():
 class LiquorMissing(Exception):
     pass
 
+class DuplicateRecipeName(Exception):
+    pass
+
 class CorruptLine(Exception):
     pass
 
@@ -88,6 +91,9 @@ def add_recipe(r):
     name as key and the recipe as a value"""
     if (r.name not in _recipes_db.keys()):
         _recipes_db[r.name] = r
+    else:
+        err = "Sorry the name %s is already used, please use a different name."%r.name
+        raise DuplicateRecipeName(err)
 
 def get_recipe(name):
     """returns a recipe"""

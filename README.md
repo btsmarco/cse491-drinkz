@@ -17,3 +17,6 @@ Hmmmm... a startup idea is born!
 Running the tests:
 
 To run the tests, 'nosetests'.  'nosetests -v' will give you the test names.
+Run like so:
+
+   python2.7 app.py
