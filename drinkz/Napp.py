@@ -200,7 +200,7 @@ class SimpleApp(object):
         </tr>
         """
         for k,v in db._recipes_db.iteritems():
-            content += "<tr><td>%s</td><td>%s</td></tr>"%(k,v.need_ingredients)
+            content += "<tr><td>%s</td><td> "%(k)
             if (v.need_ingredients):
                 content += "no"
             else:
@@ -317,11 +317,41 @@ class SimpleApp(object):
         response = simplejson.dumps(response)
         return str(response)
 
-    def rpc_hello(self):
-        return 'world!'
+    def rpc_convert_units_to_ml(self,amount):
+        if("ml") in amount:
+            amount = amount.strip('ml')
+            amount = amount.strip()
+            result = float(amount)
+        elif("oz") in amount:
+            amount = amount.strip('oz')
+            amount = amount.strip()
+            result = (float(amount)*29.5735)#1 oz=29.57ml
+        elif("gallon") in amount:
+            amount = amount.strip('gallon')
+            amount = amount.strip()
+            result = (float(amount)*3785.41)
+        elif("liter") in amount:
+            amount = amount.strip('liter')
+            amount = amount.strip()
+            result = (float(amount)*1000)
+        else:
+            assert 0, amount
 
-    def rpc_add(self, a, b):
-        return int(a) + int(b)
+        return result 
+
+    def rpc_recipes_names(self):
+        recp = []
+        for k,v in db._recipes_db.iteritems():
+            recp.append(k)
+
+        return recp
+
+    def rpc_liquor_inventory(self):
+        inv = []
+        for k,v in db._inventory_db.iteritems():
+            inv.append(k)
+
+        return inv
     
 def form():
     title = "forum"

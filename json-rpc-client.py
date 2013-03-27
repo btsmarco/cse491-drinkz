@@ -28,8 +28,10 @@ def call_remote(base, method, params, id):
     return response['result']
 
 if __name__ == '__main__':
+    #sys.argv[1] is the url since it is the second argument on the command line
     server_base = sys.argv[1]
 
-    print 'hello!', call_remote(server_base, method='hello', params=[], id=1)
-
-    print 'add:', call_remote(server_base, method='add', params=[1, 2], id=1)
+    print 'Convert to ml!', call_remote(server_base,method='convert_units_to_ml', params=['1 oz' ], id=1)
+    
+    print 'recipes_names:', call_remote(server_base, method='recipes_names', params=[], id=1)
+    print 'liquor_inventory:', call_remote(server_base, method='liquor_inventory', params=[], id=1)

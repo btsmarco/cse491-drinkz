@@ -30,7 +30,7 @@ def save_db(filename):
     fp.close()
 
 def load_db(filename):
-    global _bottle_types_db, _inventory_db
+    global _bottle_types_db, _inventory_db, _recipes_db
     fp = open(filename, 'rb')
 
     loaded = load(fp)
@@ -149,7 +149,7 @@ def convert_to_ml(amount):
     return result 
 
 
-    return 0
+#    return 0
 
 def check_inventory_for_type(typ):
     max_amount = 0
