@@ -185,8 +185,8 @@ class SimpleApp(object):
             
     def index(self, environ, start_response):
         title = "Drinkz"
-        content = """<p>Hi this Project 3 for CSE 491, hopefully you enjoy it :D</p>
-        <input type="button" onclick="alertThem()" value="Show alert box">)"""
+        content = """<p>Hi this Project 4 for CSE 491, hopefully you enjoy it :D</p>
+        <input type="button" onclick="alertThem()" value="Show alert box">"""
         data = begining % (title,title) + content + end 
         start_response('200 OK', list(html_headers))
         return [data]
@@ -261,6 +261,7 @@ class SimpleApp(object):
         return [data]
    
     def recv(self, environ, start_response):
+        title = "forum";
         formdata = environ['QUERY_STRING']
         results = urlparse.parse_qs(formdata)
 
@@ -270,7 +271,7 @@ class SimpleApp(object):
             amount = num + ' '+ unit
             r = db.convert_to_ml(amount)
             content_type = 'text/html'
-            data = "Amount: %f ml.  <a href='./'>return to index</a>" %(r)
+            data = begining%(title,title) + "Amount: %.3f ml.  <a href='./'>return to index</a>" %(r)+ end
         else:
             data = "Please insert a valid value, which is a number. <a href='./'>return to index</a>" 
 
@@ -323,7 +324,8 @@ class SimpleApp(object):
         return int(a) + int(b)
     
 def form():
-    return """
+    title = "forum"
+    return begining%(title,title) + """
 <form action='recv'>
 Amount: <input type='text' name='amount' size'10'>
 unit: <select name="unit">
@@ -333,4 +335,4 @@ unit: <select name="unit">
     </select>
 <input type='submit'>
 </form>
-"""
+""" + end
