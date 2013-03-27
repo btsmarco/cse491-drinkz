@@ -1,5 +1,4 @@
 #! /usr/bin/env python
-
 import os
 import drinkz.db
 from drinkz import recipes

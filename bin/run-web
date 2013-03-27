@@ -1,11 +1,10 @@
 #! /usr/bin/env python
-import socket, _mypath
+import socket, _mypath, simplejson, random
 from wsgiref.simple_server import make_server
-from drinkz.app import SimpleApp
-import simplejson
+from drinkz.Napp import SimpleApp
 
 if __name__ == '__main__':
-    port = 8999
+    port = random.randrange(8000,9000) 
 
     app = SimpleApp()
 
