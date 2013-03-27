@@ -8,7 +8,7 @@ dispatch = {
     '/recipes' : 'recipes',
     '/error' : 'error',
     '/inventory' : 'inventory',
-    '/liquor_type' : 'liquor_type',
+    '/liquor_types' : 'liquor_types',
     '/form' : 'form',
     '/recv' : 'recv',
     '/rpc'  : 'dispatch_rpc'
@@ -16,12 +16,19 @@ dispatch = {
 
 html_headers = [('Content-type', 'text/html')]
 
+db.load_db("Database")
+
 begining = """ \
 <!DOCTYPE html>
 <html>
 	<head>
 		<meta http-equiv="Content-type" content="text/html; charset=utf-8">
         <title> %s </title>
+        <script>
+            function alertThem(){
+                alert("Hi you are awesome");
+            }
+        </script>
         <style type="text/css"> 
             h2{
                 color: #B0171F;
@@ -138,7 +145,7 @@ begining = """ \
             <h1 class="head">%s</h1>
 			<nav>
 				<div class="navbox">
-					<a href="/">home</a>
+					<a href="/">Home</a>
 				</div>
 				<div class="navbox">
 					<a href="/recipes">Recipes</a>
@@ -154,7 +161,7 @@ begining = """ \
 				</div>
 			</nav>
             <article>""" 
-end = """\ 	</article>
+end = """ 	</article>
 
 		</div>
 		<img id="bottom" src="../img/signituretrans.png" alt="signiture"/>
@@ -178,9 +185,8 @@ class SimpleApp(object):
             
     def index(self, environ, start_response):
         title = "Drinkz"
-        content = """<p>Hi this Project 3 for CSE 491, hopefully you enjoy it :D</p>"""
-        for p in db._bottle_types_db:
-            content += p[0]
+        content = """<p>Hi this Project 3 for CSE 491, hopefully you enjoy it :D</p>
+        <input type="button" onclick="alertThem()" value="Show alert box">)"""
         data = begining % (title,title) + content + end 
         start_response('200 OK', list(html_headers))
         return [data]
@@ -214,7 +220,7 @@ class SimpleApp(object):
         <td><strong>Amount</strong></td>
         </tr>
         """
-        for k,v in drinkz.db._inventory_db.iteritems():
+        for k,v in db._inventory_db.iteritems():
             content += "<tr><td>%s </td><td>%s</td><td>%d ml\
             </td></tr>"%(k[0],k[1],v)
         content += "</table>"
@@ -226,7 +232,7 @@ class SimpleApp(object):
     def liquor_types(self, environ, start_response):
         title = "liquor"
         content = "<ul>"
-        for (mfg, lqr,typ) in drinkz.db._bottle_types_db:
+        for (mfg, lqr,typ) in db._bottle_types_db:
             content += "<li>%s, %s, %s</li>"%(mfg,lqr,typ)
         content += "</ul>" 
         data = begining % (title,title) + content + end 

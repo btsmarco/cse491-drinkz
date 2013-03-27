@@ -12,7 +12,8 @@ except OSError:
 #########################################
 #
 drinkz.db._reset_db()
-
+drinkz.db.load_db('Database')
+"""
 drinkz.db.add_bottle_type('Johnnie Walker', 'black label', 'blended scotch')
 drinkz.db.add_to_inventory('Johnnie Walker', 'black label', '500 ml')
 
@@ -30,6 +31,7 @@ r2 = recipes.Recipe('vodka martini', [('unflavored vodka', '6 oz'),
                                             ('vermouth', '1.5 oz')])
 drinkz.db.add_recipe(r)
 drinkz.db.add_recipe(r2)
+"""
 #
 #########################################
 #
