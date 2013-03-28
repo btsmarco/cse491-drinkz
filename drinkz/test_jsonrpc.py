@@ -1,4 +1,4 @@
-import Napp, urllib, db, simplejson 
+import app, urllib, db, simplejson 
 from cStringIO import StringIO
 from drinkz import recipes
 

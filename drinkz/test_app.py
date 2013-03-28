@@ -1,4 +1,4 @@
-import Napp, urllib
+import app, urllib
 import db
 from drinkz import recipes
 

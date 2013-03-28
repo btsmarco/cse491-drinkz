@@ -1,14 +1,14 @@
-#! /usr/bin/env python
 from wsgiref.simple_server import make_server
-import drinkz.db
-from drinkz import recipes
 import urlparse, simplejson
+import db
+from drinkz import recipes
 
 dispatch = {
     '/' : 'index',
-    '/content' : 'somefile',
+    '/recipes' : 'recipes',
     '/error' : 'error',
-    '/helmet' : 'helmet',
+    '/inventory' : 'inventory',
+    '/liquor_types' : 'liquor_types',
     '/form' : 'form',
     '/recv' : 'recv',
     '/rpc'  : 'dispatch_rpc'
@@ -16,155 +16,25 @@ dispatch = {
 
 html_headers = [('Content-type', 'text/html')]
 
-class SimpleApp(object):
-    def __call__(self, environ, start_response):
+db.load_db("Database")
 
-        path = environ['PATH_INFO']
-        fn_name = dispatch.get(path, 'error')
-
-        # retrieve 'self.fn_name' where 'fn_name' is the
-        # value in the 'dispatch' dictionary corresponding to
-        # the 'path'.
-        fn = getattr(self, fn_name, None)
-
-        if fn is None:
-            start_response("404 Not Found", html_headers)
-            return ["No path %s found" % path]
-
-        return fn(environ, start_response)
-            
-    def index(self, environ, start_response):
-        data = """\
-Visit:
-<a href='content'>a file</a>,
-<a href='error'>an error</a>,
-<a href='helmet'>an image</a>,
-<a href='somethingelse'>something else</a>, or
-<a href='form'>a form...</a>
-<p>
-<img src='/helmet'>
-"""
-        start_response('200 OK', list(html_headers))
-        return [data]
-        
-    def somefile(self, environ, start_response):
-        content_type = 'text/html'
-        data = open('somefile.html').read()
-
-        start_response('200 OK', list(html_headers))
-        return [data]
-
-    def error(self, environ, start_response):
-        status = "404 Not Found"
-        content_type = 'text/html'
-        data = "Couldn't find your stuff."
-       
-        start_response('200 OK', list(html_headers))
-        return [data]
-
-    def helmet(self, environ, start_response):
-        content_type = 'image/gif'
-        data = open('Spartan-helmet-Black-150-pxls.gif', 'rb').read()
-
-        start_response('200 OK', [('Content-type', content_type)])
-        return [data]
-
-    def form(self, environ, start_response):
-        data = form()
-
-        start_response('200 OK', list(html_headers))
-        return [data]
-   
-    def recv(self, environ, start_response):
-        formdata = environ['QUERY_STRING']
-        results = urlparse.parse_qs(formdata)
-
-        firstname = results['firstname'][0]
-        lastname = results['lastname'][0]
-
-        content_type = 'text/html'
-        data = "First name: %s; last name: %s.  <a href='./'>return to index</a>" % (firstname, lastname)
-
-        start_response('200 OK', list(html_headers))
-        return [data]
-
-    def dispatch_rpc(self, environ, start_response):
-        # POST requests deliver input data via a file-like handle,
-        # with the size of the data specified by CONTENT_LENGTH;
-        # see the WSGI PEP.
-        
-        if environ['REQUEST_METHOD'].endswith('POST'):
-            body = None
-            if environ.get('CONTENT_LENGTH'):
-                length = int(environ['CONTENT_LENGTH'])
-                body = environ['wsgi.input'].read(length)
-                response = self._dispatch(body) + '\n'
-                start_response('200 OK', [('Content-Type', 'application/json')])
-
-                return [response]
-
-        # default to a non JSON-RPC error.
-        status = "404 Not Found"
-        content_type = 'text/html'
-        data = "Couldn't find your stuff."
-       
-        start_response('200 OK', list(html_headers))
-        return [data]
-
-    def _decode(self, json):
-        return simplejson.loads(json)
-
-    def _dispatch(self, json):
-        rpc_request = self._decode(json)
-
-        method = rpc_request['method']
-        params = rpc_request['params']
-        
-        rpc_fn_name = 'rpc_' + method
-        fn = getattr(self, rpc_fn_name)
-        result = fn(*params)
-
-        response = { 'result' : result, 'error' : None, 'id' : 1 }
-        response = simplejson.dumps(response)
-        return str(response)
-
-    def rpc_hello(self):
-        return 'world!'
-
-    def rpc_add(self, a, b):
-        return int(a) + int(b)
-    
-def form():
-    return """
-<form action='recv'>
-Your first name? <input type='text' name='firstname' size'20'>
-Your last name? <input type='text' name='lastname' size='20'>
-<input type='submit'>
-</form>
-"""
-
-if __name__ == '__main__':
-    import random, socket
-    port = random.randint(8000, 9999)
-    
-    app = SimpleApp()
-    
-    httpd = make_server('', port, app)
-    print "Serving on port %d..." % port
-    print "Try using a Web browser to go to http://%s:%d/" % \
-          (socket.getfqdn(), port)
-    httpd.serve_forever()
-"""\
-<style type="text/css"> 
+begining = """ \
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+        <title> %s </title>
+        <script>
+            function alertThem(){
+                alert("Hi you are awesome");
+            }
+        </script>
+        <style type="text/css"> 
             h2{
                 color: #B0171F;
             }
             html, body{
-                height:100%;
-            }
-            .main{
-                background-image: url(../img/lamp.jpg);
-                background-size:80%%;
+                height:100%%;
             }
             .wrapper{
                 width:auto;
@@ -173,7 +43,7 @@ if __name__ == '__main__':
                 background:white;
                 min-height:100%%;
                 padding:30px 50px 50px 30px ;
-                width:500px;
+                width:550px;
             	margin-left:auto;
                 margin-right:auto;
                 border:5px solid;
@@ -268,4 +138,237 @@ if __name__ == '__main__':
                 margin-top:100px;
             }
         </style>
-"""
+
+    </head>
+	<body>
+		<div class="container">
+            <h1 class="head">%s</h1>
+			<nav>
+				<div class="navbox">
+					<a href="/">Home</a>
+				</div>
+				<div class="navbox">
+					<a href="/recipes">Recipes</a>
+				</div>
+				<div class="navbox">
+					<a href="/inventory">Inventory</a>
+				</div>
+				<div class="navbox">
+					<a href="/liquor_types">Liquor types</a>
+				</div>
+           		<div class="navbox">
+					<a href="/form">Convert to ml</a>
+				</div>
+			</nav>
+            <article>""" 
+end = """ 	</article>
+
+		</div>
+		<img id="bottom" src="signituretrans.png" alt="signiture"/>
+	</body>
+</html>"""
+class SimpleApp(object):
+    def __call__(self, environ, start_response):
+        path = environ['PATH_INFO']
+        fn_name = dispatch.get(path, 'error')
+
+        # retrieve 'self.fn_name' where 'fn_name' is the
+        # value in the 'dispatch' dictionary corresponding to
+        # the 'path'.
+        fn = getattr(self, fn_name, None)
+
+        if fn is None:
+            start_response("404 Not Found", html_headers)
+            return ["No path %s found" % path]
+
+        return fn(environ, start_response)
+            
+    def index(self, environ, start_response):
+        title = "Drinkz"
+        content = """<p>Hi this Project 4 for CSE 491, hopefully you enjoy it :D</p>
+        <input type="button" onclick="alertThem()" value="Show alert box">"""
+        data = begining % (title,title) + content + end 
+        #for the image in the bottom
+        #pic = open('sp.png', 'rb').read()
+        #data += pic
+        #headers = [('Content-type','image/png'), ('Content-type', 'text/html')]
+
+        start_response('200 OK', list(html_headers))
+        #start_response('200 OK', headers)
+        return [data] 
+
+    def recipes(self, environ, start_response):
+        title = "recipes"
+        content = """<table border='1' margin='50px'>
+        <tr>
+        <td><strong>Recipes</strong></td>
+        <td><strong>Available?</strong></td>
+        </tr>
+        """
+        for k,v in db._recipes_db.iteritems():
+            content += "<tr><td>%s</td><td> "%(k)
+            if (v.need_ingredients):
+                content += "no"
+            else:
+                content += "ya"
+        content +=  "</td></tr>"
+        content += "</table>"
+        data = begining % (title,title) + content + end 
+        start_response('200 OK', list(html_headers))
+        return [data]
+ 
+    def inventory(self, environ, start_response):
+        title = "inventory"
+        content = """<table border='1' margin='50px'>
+        <tr>
+        <td><strong>Manufacturer</strong></td>
+        <td><strong>Liquor</strong></td>
+        <td><strong>Amount</strong></td>
+        </tr>
+        """
+        for k,v in db._inventory_db.iteritems():
+            content += "<tr><td>%s </td><td>%s</td><td>%d ml\
+            </td></tr>"%(k[0],k[1],v)
+        content += "</table>"
+
+        data = begining % (title,title) + content + end 
+        start_response('200 OK', list(html_headers))
+        return [data]
+
+    def liquor_types(self, environ, start_response):
+        title = "liquor"
+        content = "<ul>"
+        for (mfg, lqr,typ) in db._bottle_types_db:
+            content += "<li>%s, %s, %s</li>"%(mfg,lqr,typ)
+        content += "</ul>" 
+        data = begining % (title,title) + content + end 
+        start_response('200 OK', list(html_headers))
+        return [data]
+
+    def error(self, environ, start_response):
+        status = "404 Not Found"
+        content_type = 'text/html'
+        data = "Couldn't find your stuff."
+       
+        start_response('200 OK', list(html_headers))
+        return [data]
+
+    def sp(self):
+        content_type = 'image/png'
+        data = open('signituretrans.png', 'rb').read()
+
+        start_response('200 OK', [('Content-type', content_type)])
+        return [data]
+
+    def form(self, environ, start_response):
+        data = form()
+
+        start_response('200 OK', list(html_headers))
+        return [data]
+   
+    def recv(self, environ, start_response):
+        title = "forum";
+        formdata = environ['QUERY_STRING']
+        results = urlparse.parse_qs(formdata)
+
+        num = results['amount'][0]
+        unit = results['unit'][0]
+        if num.replace('.','',1).isdigit():
+            amount = num + ' '+ unit
+            r = db.convert_to_ml(amount)
+            content_type = 'text/html'
+            data = begining%(title,title) + "Amount: %.3f ml.  <a href='./'>return to index</a>" %(r)+ end
+        else:
+            data = "Please insert a valid value, which is a number. <a href='./'>return to index</a>" 
+
+        start_response('200 OK', list(html_headers))
+        return [data]
+
+    def dispatch_rpc(self, environ, start_response):
+        # POST requests deliver input data via a file-like handle,
+        # with the size of the data specified by CONTENT_LENGTH;
+        # see the WSGI PEP.
+        if environ['REQUEST_METHOD'].endswith('POST'):
+            body = None
+            if environ.get('CONTENT_LENGTH'):
+                length = int(environ['CONTENT_LENGTH'])
+                body = environ['wsgi.input'].read(length)
+                response = self._dispatch(body) + '\n'
+                start_response('200 OK', [('Content-Type', 'application/json')])
+
+                return [response]
+
+        # default to a non JSON-RPC error.
+        status = "404 Not Found"
+        content_type = 'text/html'
+        data = "Couldn't find your stuff."
+       
+        start_response('200 OK', list(html_headers))
+        return [data]
+
+    def _decode(self, json):
+        return simplejson.loads(json)
+
+    def _dispatch(self, json):
+        rpc_request = self._decode(json)
+
+        method = rpc_request['method']
+        params = rpc_request['params']
+        
+        rpc_fn_name = 'rpc_' + method
+        fn = getattr(self, rpc_fn_name)
+        result = fn(*params)
+
+        response = { 'result' : result, 'error' : None, 'id' : 1 }
+        response = simplejson.dumps(response)
+        return str(response)
+
+    def rpc_convert_units_to_ml(self,amount):
+        if("ml") in amount:
+            amount = amount.strip('ml')
+            amount = amount.strip()
+            result = float(amount)
+        elif("oz") in amount:
+            amount = amount.strip('oz')
+            amount = amount.strip()
+            result = (float(amount)*29.5735)#1 oz=29.57ml
+        elif("gallon") in amount:
+            amount = amount.strip('gallon')
+            amount = amount.strip()
+            result = (float(amount)*3785.41)
+        elif("liter") in amount:
+            amount = amount.strip('liter')
+            amount = amount.strip()
+            result = (float(amount)*1000)
+        else:
+            assert 0, amount
+
+        return result 
+
+    def rpc_recipes_names(self):
+        recp = ['hello']
+        for k,v in db._recipes_db.iteritems():
+            recp.append(k)
+
+        return recp
+
+    def rpc_liquor_inventory(self):
+        inv = []
+        for k,v in db._inventory_db.iteritems():
+            inv.append(k)
+
+        return inv
+    
+def form():
+    title = "forum"
+    return begining%(title,title) + """
+<form action='recv'>
+Amount: <input type='text' name='amount' size'10'>
+unit: <select name="unit">
+        <option value="oz"> oz</option>
+        <option value="gallon">gallon</option>
+        <option value="liter">liter</option>
+    </select>
+<input type='submit'>
+</form>
+""" + end

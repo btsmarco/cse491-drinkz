@@ -6,7 +6,6 @@ a key and the recipe as a value.
 """
 import math
 from recipes import Recipe
-
 from cPickle import dump, load
 
 # private singleton variables at module level
@@ -147,9 +146,6 @@ def convert_to_ml(amount):
         assert 0, amount
 
     return result 
-
-
-#    return 0
 
 def check_inventory_for_type(typ):
     max_amount = 0
