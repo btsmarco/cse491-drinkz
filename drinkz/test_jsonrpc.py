@@ -19,7 +19,7 @@ def test_rpc_convert():
         d['status'] = s
         d['headers'] = h
 
-    app_obj = Napp.SimpleApp()
+    app_obj = app.SimpleApp()
     results = app_obj(environ, my_start_response)
 
     text = "".join(results)
@@ -49,7 +49,7 @@ def test_rpc_recipes():
         d['status'] = s
         d['headers'] = h
 
-    app_obj = Napp.SimpleApp()
+    app_obj = app.SimpleApp()
     results = app_obj(environ, my_start_response)
 
     text = "".join(results)
@@ -79,7 +79,7 @@ def test_rpc_inventory():
         d['status'] = s
         d['headers'] = h
 
-    app_obj = Napp.SimpleApp()
+    app_obj = app.SimpleApp()
     results = app_obj(environ, my_start_response)
 
     text = "".join(results)

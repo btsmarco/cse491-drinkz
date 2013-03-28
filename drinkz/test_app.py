@@ -33,7 +33,7 @@ def test_index():
         d['status'] = s
         d['headers'] = h
 
-    app_obj = Napp.SimpleApp()
+    app_obj = app.SimpleApp()
     results = app_obj(environ, my_start_response)
 
     text = "".join(results)
@@ -54,7 +54,7 @@ def test_recipes():
         d['status'] = s
         d['headers'] = h
 
-    app_obj = Napp.SimpleApp()
+    app_obj = app.SimpleApp()
     results = app_obj(environ, my_start_response)
 
     text = "".join(results)
@@ -75,7 +75,7 @@ def test_inventory():
         d['status'] = s
         d['headers'] = h
 
-    app_obj = Napp.SimpleApp()
+    app_obj = app.SimpleApp()
     results = app_obj(environ, my_start_response)
 
     text = "".join(results)
@@ -100,7 +100,7 @@ def test_liquor_types():
         d['status'] = s
         d['headers'] = h
 
-    app_obj = Napp.SimpleApp()
+    app_obj = app.SimpleApp()
     results = app_obj(environ, my_start_response)
 
     text = "".join(results)
@@ -127,7 +127,7 @@ def test_forum():
         d['status'] = s
         d['headers'] = h
 
-    app_obj = Napp.SimpleApp()
+    app_obj = app.SimpleApp()
     results = app_obj(environ, my_start_response)
 
     text = "".join(results)
