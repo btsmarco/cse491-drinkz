@@ -1,0 +1,23 @@
+import socket, sys
+
+if len(sys.argv) != 3:
+    print "Please enter the hostname, space, then a port"
+    exit(0)
+    
+hostname = sys.argv[1]
+port = sys.argv[2]
+
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect((hostname , int(port)))
+s.send("GET / HTTP/1.0\r\n\r\n")
+
+while 1:
+    buf = s.recv(100)
+    if not buf:
+        break 
+    print buf
+sys.stdout.flush()
+s.close()
+
+#Courtesy of your link
+#http://effbot.org/zone/socket-intro.htm

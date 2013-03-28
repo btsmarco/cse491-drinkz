@@ -340,7 +340,7 @@ class SimpleApp(object):
         return result 
 
     def rpc_recipes_names(self):
-        recp = []
+        recp = ['hello']
         for k,v in db._recipes_db.iteritems():
             recp.append(k)
 
