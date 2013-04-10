@@ -9,9 +9,13 @@ dispatch = {
     '/error' : 'error',
     '/inventory' : 'inventory',
     '/liquor_types' : 'liquor_types',
-    '/form' : 'form',
+    '/forum' : 'forum',
     '/recv' : 'recv',
-    '/rpc'  : 'dispatch_rpc'
+    '/rpc'  : 'dispatch_rpc',
+    '/ml'  : '1',
+    '/lt'  : '2',
+    '/in'  : '3',
+    '/re'  : '4'
 }
 
 html_headers = [('Content-type', 'text/html')]
@@ -157,7 +161,7 @@ begining = """ \
 					<a href="/liquor_types">Liquor types</a>
 				</div>
            		<div class="navbox">
-					<a href="/form">Convert to ml</a>
+					<a href="/forum">Forums</a>
 				</div>
 			</nav>
             <article>""" 
@@ -171,6 +175,10 @@ class SimpleApp(object):
     def __call__(self, environ, start_response):
         path = environ['PATH_INFO']
         fn_name = dispatch.get(path, 'error')
+        
+        if (fn_name.isdigit()):
+            num = int(fn_name)
+            fn_name = "choose_forum"
 
         # retrieve 'self.fn_name' where 'fn_name' is the
         # value in the 'dispatch' dictionary corresponding to
@@ -181,7 +189,10 @@ class SimpleApp(object):
             start_response("404 Not Found", html_headers)
             return ["No path %s found" % path]
 
-        return fn(environ, start_response)
+        if(fn_name == "choose_forum"):
+            return fn(environ, start_response,num)
+        else:
+            return fn(environ, start_response)
             
     def index(self, environ, start_response):
         title = "Drinkz"
@@ -259,15 +270,39 @@ class SimpleApp(object):
 
         start_response('200 OK', [('Content-type', content_type)])
         return [data]
-
-    def form(self, environ, start_response):
-        data = form()
+        
+    def choose_forum(self, environ, start_response, num):
+        data = forums(num)
 
         start_response('200 OK', list(html_headers))
         return [data]
-   
-    def recv(self, environ, start_response):
-        title = "forum";
+
+    def forum(self, environ, start_response):
+        title = "forums"
+        content = """<p>Hi What would you like to do?</p>
+        <p>Below you can see different forums, please choose one of them.</p>
+        <nav>
+        <div class="navbox" style='display:block;margin-bottom:20px'>
+                <a href="/ml">Convert to ml</a>
+            </div>
+            <div class="navbox" style='display:block;margin-bottom:20px'>
+                <a href="/lt">Insert Liquor types</a>
+            </div>
+            <div class="navbox" style='display:block;margin-bottom:20px'>
+                <a href="/in">Add to Inventory</a>
+            </div>
+            <div class="navbox" style='display:block;margin-bottom:20px'>
+                <a href="/re">Add recipes</a>
+            </div>
+        </nav>
+        """
+        data = begining % (title,title) + content + end 
+
+        start_response('200 OK', list(html_headers))
+        return [data] 
+
+    def recv_ml(self, environ, start_response):
+        title = "ml forum";
         formdata = environ['QUERY_STRING']
         results = urlparse.parse_qs(formdata)
 
@@ -283,6 +318,25 @@ class SimpleApp(object):
 
         start_response('200 OK', list(html_headers))
         return [data]
+
+    def recv_li(self, environ, start_response):
+        title = "liquor forum";
+        formdata = environ['QUERY_STRING']
+        results = urlparse.parse_qs(formdata)
+
+        num = results['amount'][0]
+        unit = results['unit'][0]
+        if num.replace('.','',1).isdigit():
+            amount = num + ' '+ unit
+            r = db.convert_to_ml(amount)
+            content_type = 'text/html'
+            data = begining%(title,title) + "Amount: %.3f ml.  <a href='./'>return to index</a>" %(r)+ end
+        else:
+            data = "Please insert a valid value, which is a number. <a href='./'>return to index</a>" 
+
+        start_response('200 OK', list(html_headers))
+        return [data]
+
 
     def dispatch_rpc(self, environ, start_response):
         # POST requests deliver input data via a file-like handle,
@@ -359,62 +413,119 @@ class SimpleApp(object):
 
         return inv
 
-#make sure you change the name of this
-def form_ml():
-    title = "forum"
-    return begining%(title,title) + """
-<form action='recv'>
-Amount: <input type='text' name='amount' size'10'>
-unit: <select name="unit">
-        <option value="oz"> oz</option>
-        <option value="gallon">gallon</option>
-        <option value="liter">liter</option>
-    </select>
-<input type='submit'>
-</form>
-""" + end
+def forums(C):
+    #convert to ml
+    if (C == 1):
+        title = "ml forum"
+        return begining%(title,title) + """
+    <form action='recv_ml'>
+    Amount: <input type='text' name='amount' size'10'>
+    unit: <select name="unit">
+            <option value="oz"> oz</option>
+            <option value="gallon">gallon</option>
+            <option value="liter">liter</option>
+        </select>
+    <input type='submit'>
+    </form>
+    """ + end
+    #This is for the liquor types
+    elif (C == 2):
+        title = "liquor forum"
+        return begining%(title,title) + """
+        <form action='recv_li'>
+        Manufacturer: <input type='text' name='mnf' size='10'>
+        Liquor: <input type='text' name='liq' size='10'>
+        Type: <input type='text' name='type' size='10'>
+        <input type='submit'>
+        </form>
+        """ + end
+
+    #This is for the inventory 
+    elif (C == 3):
+        title = "inventory forum"
+        return begining%(title,title) + """
+        <form action='recv'>
+        Manufacturer: <input type='text' name='mnf' size='10'>
+        Liquor: <input type='text' name='liq' size='10'>
+        Amount: <input type='text' name='amount' size='10'>
+        unit: <select name="unit">
+                <option value="oz"> oz</option>
+                <option value="gallon">gallon</option>
+                <option value="liter">liter</option>
+            </select>
+        <input type='submit'>
+        </form>
+        """ + end
+   
+    #This is for the reciepes 
+    elif (C == 4):
+        title = "recipe forum"
+        return begining%(title,title) + """
+        <form action='recv'>
+        Name: <input type='text' name='name' size='10'>
+        Amount: <input type='text' name='amount' size='10'>
+        unit: <select name="unit">
+                <option value="oz"> oz</option>
+                <option value="gallon">gallon</option>
+                <option value="liter">liter</option>
+            </select>
+        <input type="button" class="btn"/>
+        <script>
+
+
+        </script>
+        <input type='submit'>
+        </form>
+        """ + end
+
+    else:
+        return " "
+    
 
 #change the forums
-def form_li():
-    title = "forum"
-    return begining%(title,title) + """
-<form action='recv'>
-: <input type='text' name='amount' size'10'>
-Amount: <input type='text' name='amount' size'10'>
-Amount: <input type='text' name='amount' size'10'>
-unit: <select name="unit">
-        <option value="oz"> oz</option>
-        <option value="gallon">gallon</option>
-        <option value="liter">liter</option>
-    </select>
-<input type='submit'>
-</form>
-""" + end
+#def forum_li():
+#    title = "liquor forum"
+#    return begining%(title,title) + """
+#<form action='recv'>
+#Manufacturer: <input type='text' name='mnf' size='10'>
+#Liquor: <input type='text' name='liq' size='10'>
+#Type: <input type='text' name='type' size='10'>
+#<input type='submit'>
+#</form>
+#""" + end
 
-def form_in():
-    title = "forum"
-    return begining%(title,title) + """
-<form action='recv'>
-Amount: <input type='text' name='amount' size'10'>
-unit: <select name="unit">
-        <option value="oz"> oz</option>
-        <option value="gallon">gallon</option>
-        <option value="liter">liter</option>
-    </select>
-<input type='submit'>
-</form>
-""" + end
+#def forum_in():
+#    title = "inventory forum"
+#    return begining%(title,title) + """
+#<form action='recv'>
+#Manufacturer: <input type='text' name='mnf' size='10'>
+#Liquor: <input type='text' name='liq' size='10'>
+#Amount: <input type='text' name='amount' size='10'>
+#unit: <select name="unit">
+#        <option value="oz"> oz</option>
+#        <option value="gallon">gallon</option>
+#        <option value="liter">liter</option>
+#    </select>
+#<input type='submit'>
+#</form>
+#""" + end
 
-def form_re():
-    title = "forum"
-    return begining%(title,title) + """
-<form action='recv'>
-Amount: <input type='text' name='amount' size'10'>
-unit: <select name="unit">
-        <option value="oz"> oz</option>
-        <option value="gallon">gallon</option>
-        <option value="liter">liter</option>
-    </select>
-<input type='submit'>
-</form>
-""" + end
+#def forum_re():
+#    title = "forum"
+#    return begining%(title,title) + """
+#<form action='recv'>
+#Name: <input type='text' name='name' size='10'>
+#Amount: <input type='text' name='amount' size='10'>
+#unit: <select name="unit">
+#        <option value="oz"> oz</option>
+#        <option value="gallon">gallon</option>
+ #       <option value="liter">liter</option>
+#    </select>
+#<input type="button" class="btn"/>
+#<script>
+#
+#
+#</script>
+#<input type='submit'>
+#</form>
+#""" + end
