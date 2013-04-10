@@ -157,4 +157,14 @@ def check_inventory_for_type(typ):
 
     return max_amount 
 
+def check_available_recipes():
+    """ The function needs to return a list of recipes that could be made with
+    the inventory available. The function uses recipe.need_ingrediants(), if
+    nothing is returned we add it to the list"""
+    av = []
+    for rec in _recipes_db.keys():
+        if (_recipes_db[rec].need_ingredients() == []):
+            av.append(_recipes_db[rec])
+    
+    return av 
 

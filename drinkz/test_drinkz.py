@@ -12,7 +12,7 @@ sys.path.insert(0, 'bin/') # allow _mypath to be loaded; @CTB hack hack hack
 from cStringIO import StringIO
 import imp
 
-from . import db, load_bulk_data
+from . import db, load_bulk_data, recipes
 
 def test_foo():
     # this test always passes; it's just to show you how it's done!
@@ -144,4 +144,75 @@ def test_show_liquor_amounts():
     db.add_to_inventory('Johnnie Walker', 'Black Label', '1000 ml')
 
     db.show_liquor_amounts()
+
+def test_check_available_recipes():
+    db._reset_db()
+
+    db.add_bottle_type('Johnnie Walker', 'black label', 'blended scotch')
+    db.add_to_inventory('Johnnie Walker', 'black label', '5 oz')
+
+    #r should be all set
+    r = recipes.Recipe('scotch on the rocks', [('blended scotch','4 oz')])
+
+    
+    db.add_recipe(r)
+    r2 = recipes.Recipe('vodka martini', [('unflavored vodka', '6 oz'),
+                                            ('vermouth', '1.5 oz')])
+
+    db.add_recipe(r2)
+
+    avR = db.check_available_recipes()
+
+    assert len(avR) == 1, avR
+    assert avR[0] == r, avR[0]
+
+def test_check_available_recipes_2():
+    db._reset_db()
+
+
+    db.add_bottle_type('Gray Goose', 'vodka', 'unflavored vodka')
+    db.add_to_inventory('Gray Goose', 'vodka', '7 oz')
+
+    db.add_bottle_type('Rossi', 'extra dry vermouth', 'vermouth')
+    db.add_to_inventory('Rossi', 'extra dry vermouth', '4 oz')
+
+    
+    r = recipes.Recipe('scotch on the rocks', [('blended scotch','4 oz')])
+
+    r2 = recipes.Recipe('vomit inducing martini', [('orange juice', '6 oz'), ('vermouth','1.5 oz')])
+
+    r3 = recipes.Recipe('vodka martini', [('unflavored vodka', '6 oz'),
+                                            ('vermouth', '1.5 oz')])
+
+
+    db.add_recipe(r)
+    db.add_recipe(r2)
+    db.add_recipe(r3)
+
+    avR = db.check_available_recipes()
+
+    assert len(avR) == 1, avR
+    assert avR[0] == r3, avR[0].name
+
+def test_bulk_load_recipes():
+    db._reset_db()
+
+    data = "whiskey bath, blended scotch, 6 liter"
+    fp = StringIO(data)                 # make this look like a file handle
+    n = load_bulk_data.load_recipes(fp)
+
+    assert db.get_recipe('whiskey bath')
+    assert n == 1, n
+
+def test_bulk_load_recipes_2():
+    db._reset_db()
+
+    data = """ 4 oz\n#  whiskey bath, blended scotch, 6 liter\n\nvomit inducing martini, 6 oz, vermouth, 1.5 oz
+    """ 
+
+    fp = StringIO(data)            # make this look like a file handle
+    n = load_bulk_data.load_recipes(fp)
+
+    assert n == 0,n
+
 

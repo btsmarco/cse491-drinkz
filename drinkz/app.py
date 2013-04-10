@@ -358,8 +358,54 @@ class SimpleApp(object):
             inv.append(k)
 
         return inv
-    
-def form():
+
+#make sure you change the name of this
+def form_ml():
+    title = "forum"
+    return begining%(title,title) + """
+<form action='recv'>
+Amount: <input type='text' name='amount' size'10'>
+unit: <select name="unit">
+        <option value="oz"> oz</option>
+        <option value="gallon">gallon</option>
+        <option value="liter">liter</option>
+    </select>
+<input type='submit'>
+</form>
+""" + end
+
+#change the forums
+def form_li():
+    title = "forum"
+    return begining%(title,title) + """
+<form action='recv'>
+: <input type='text' name='amount' size'10'>
+Amount: <input type='text' name='amount' size'10'>
+Amount: <input type='text' name='amount' size'10'>
+unit: <select name="unit">
+        <option value="oz"> oz</option>
+        <option value="gallon">gallon</option>
+        <option value="liter">liter</option>
+    </select>
+<input type='submit'>
+</form>
+""" + end
+
+def form_in():
+    title = "forum"
+    return begining%(title,title) + """
+<form action='recv'>
+Amount: <input type='text' name='amount' size'10'>
+unit: <select name="unit">
+        <option value="oz"> oz</option>
+        <option value="gallon">gallon</option>
+        <option value="liter">liter</option>
+    </select>
+<input type='submit'>
+</form>
+""" + end
+
+def form_re():
     title = "forum"
     return begining%(title,title) + """
 <form action='recv'>

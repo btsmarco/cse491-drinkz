@@ -1,0 +1,8 @@
+# a simple example of a "good" data file.
+# this file has, at the end, a blank line, which should be handled
+# (ignored!) by our loading script - just like these comments.
+scotch on the rocks, blended scotch,4 oz
+vodka martini, unflavored vodka, 6 oz, vermouth, 1.5 oz
+vomit inducing martini, orange juice, 6 oz, vermouth, 1.5 oz
+whiskey bath, blended scotch, 6 liter
+
