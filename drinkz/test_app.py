@@ -2,26 +2,6 @@ import app, urllib
 import db
 from drinkz import recipes
 
-#def test_input():
-#    drinkz.db._reset_db()
-#    drinkz.db.add_bottle_type('Johnnie Walker', 'black label', 'blended scotch')
-#    drinkz.db.add_to_inventory('Johnnie Walker', 'black label', '500 ml')
-
-#    drinkz.db.add_bottle_type('Uncle Herman\'s', 'moonshine', 'blended scotch')
-#    drinkz.db.add_to_inventory('Uncle Herman\'s', 'moonshine', '5 liter')
-
- #   drinkz.db.add_bottle_type('Gray Goose', 'vodka', 'unflavored vodka')
-#    drinkz.db.add_to_inventory('Gray Goose', 'vodka', '1 liter')
-
-#    drinkz.db.add_bottle_type('Rossi', 'extra dry vermouth', 'vermouth')
-#    drinkz.db.add_to_inventory('Rossi', 'extra dry vermouth', '24 oz')
-
-#    r = recipes.Recipe('scotch on the rocks', [('blended scotch','2 oz')])
-#    r2 = recipes.Recipe('vodka martini', [('unflavored vodka', '6 oz'),\
-  #                                              ('vermouth', '1.5 oz')])
-#    drinkz.db.add_recipe(r)
- #   drinkz.db.add_recipe(r2)
-
 def test_index():
     #making an empty environ dictionary
     environ = {}
@@ -118,7 +98,7 @@ def test_forum():
     environ = {}
     environ['QUERY_STRING'] = urllib.urlencode(dict(amount='1',unit='oz'))
 
-    environ['PATH_INFO'] = '/recv'
+    environ['PATH_INFO'] = '/recv_ml'
 
    
     #making a start_response function 

@@ -1,0 +1,7 @@
+This is a guide on how to load-bulk recipes
+
+The load-bulk data is in test-data/recipes.txt.
+In drinkz/load_bulk_data there is a load_recipes function that reads the file line by line.
+Finally, this function is used bin/load-recipes to load the file recipes.txt
+and BOOOM you got it. 
+

@@ -1,4 +1,4 @@
-import socket, sys
+import socket, sys, os
 
 if len(sys.argv) != 3:
     print "Please enter the hostname, space, then a port"
@@ -38,6 +38,7 @@ def T_GET_Form():
     s.send("GET /form HTTP/1.0\r\n\r\n")
     
     s.send('I am good')
+
     reply = "" 
     #grabs pieces until there is no more info to grab
     while 1:
@@ -48,16 +49,8 @@ def T_GET_Form():
 
     print reply 
 
-
-    while 1:
-        buf = s.recv(100)
-        if not buf:
-           break 
-        reply += buf
- 
     sys.stdout.flush()
     s.close()
-
 
 def T_GET_PIC():
     hostname = sys.argv[1]
@@ -69,24 +62,30 @@ def T_GET_PIC():
     #asking the server for the index page
     s.send("GET /pic HTTP/1.0\r\n\r\n")
     
-    reply = bytes() 
-    buf = bytes()
+    reply = '' 
+    buf = ''
     #grabs pieces until there is no more info to grab
     while 1:
         buf = s.recv(100)
         if not buf:
            break 
-        reply += buf
-    
-    pic = open('Recieved-Spartan-helmet.gif','wb')
+        if '\r\n' in buf:
+            continue
+        else:
+            reply += buf
+        
+    pic = open('RSpartan-helmet.gif','wb')
     pic.write(reply)
+    size = pic.tell()
+    
+    assert os.path.exists('Recieved-Spartan-helmet.gif')
+    assert size == 2399, size
+
     pic.close
-   
+
     #Test see if a file exsists and how many bytes does it have
     sys.stdout.flush()
     s.close()
-
-
 
 
 if __name__ == "__main__":

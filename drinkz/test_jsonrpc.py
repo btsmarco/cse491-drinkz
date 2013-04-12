@@ -31,7 +31,6 @@ def test_rpc_convert():
     assert status == '200 OK'
 
 def test_rpc_recipes():
-
     db.load_db("Database")
 
     #making an empty environ dictionary
@@ -120,7 +119,9 @@ def test_rpc_add_liquor_type():
     assert status == '200 OK'
 
 def test_rpc_add_to_inventory():
-    db.load_db('Database')
+    db._reset_db()
+    db.add_bottle_type("Marco Botros","vodka","like the moon")
+    #db.load_db('Database')
 
     #making an empty environ dictionary
     environ = {}
@@ -144,5 +145,33 @@ def test_rpc_add_to_inventory():
     status, headers = d['status'], d['headers']
   	
     assert db.check_inventory('Marco Botros', 'vodka'),db._inventory_db
+    assert ('Content-Type', 'application/json') in headers
+    assert status == '200 OK'
+
+def test_rpc_add_to_inventory():
+    db.load_db('Database')
+
+    #making an empty environ dictionary
+    environ = {}
+    environ['PATH_INFO'] = '/rpc'
+    d = dict(method= 'add_recipe',params=['THE DUDE',[("Marco Botros","3 oz"),('vodka','1 liter')]], id=1)
+    encoded = simplejson.dumps(d)
+    environ['wsgi.input'] = StringIO(encoded) 
+    environ['CONTENT_LENGTH'] = len(encoded) 
+    environ['REQUEST_METHOD'] = 'POST' 
+   
+    #making a start_response function 
+    d = {}
+    def my_start_response(s, h, return_in=d):
+        d['status'] = s
+        d['headers'] = h
+
+    app_obj = app.SimpleApp()
+    results = app_obj(environ, my_start_response)
+
+    text = "".join(results)
+    status, headers = d['status'], d['headers']
+  	
+    assert db.get_recipe('THE DUDE'),db._recipes_db
     assert ('Content-Type', 'application/json') in headers
     assert status == '200 OK'

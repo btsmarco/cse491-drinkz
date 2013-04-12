@@ -37,7 +37,7 @@ if __name__ == '__main__':
 
     print 'add_to_inventory:', call_remote(server_base, method='add_to_inventory',params=[("Marco Botros","vodka","3 oz")], id=1)
  
-    print 'add_recipe:', call_remote(server_base, method='add_recipe',params=['The DUDE',[("Marco Botros","3 oz"),('vodka','1 liter')]], id=1)
+    print 'add_recipe:', call_remote(server_base, method='add_recipe',params=['THE DUDE',[("Marco Botros","3 oz"),('vodka','1 liter')]], id=1)
    
     print 'recipes_names:', call_remote(server_base, method='recipes_names', params=[], id=1)
 
