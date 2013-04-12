@@ -1,7 +1,6 @@
 from wsgiref.simple_server import make_server
-import urlparse, simplejson
-import db
-from drinkz import recipes
+import urlparse, simplejson, db, recipes
+from jinja2 import Environment  
 
 dispatch = {
     '/' : 'index',
@@ -9,8 +8,12 @@ dispatch = {
     '/error' : 'error',
     '/inventory' : 'inventory',
     '/liquor_types' : 'liquor_types',
-    '/forum' : 'forum',
-    '/recv' : 'recv',
+    '/form' : 'form',
+    '/recv_ml' : 'recv_ml',
+    '/recv_li' : 'recv_li',
+    '/recv_in' : 'recv_in',
+    '/recv_re' : 'recv_re',
+    '/recv_re_2' : 'recv_re_2',
     '/rpc'  : 'dispatch_rpc',
     '/ml'  : '1',
     '/lt'  : '2',
@@ -161,7 +164,7 @@ begining = """ \
 					<a href="/liquor_types">Liquor types</a>
 				</div>
            		<div class="navbox">
-					<a href="/forum">Forums</a>
+					<a href="/form">Forms</a>
 				</div>
 			</nav>
             <article>""" 
@@ -178,7 +181,7 @@ class SimpleApp(object):
         
         if (fn_name.isdigit()):
             num = int(fn_name)
-            fn_name = "choose_forum"
+            fn_name = "choose_form"
 
         # retrieve 'self.fn_name' where 'fn_name' is the
         # value in the 'dispatch' dictionary corresponding to
@@ -189,8 +192,8 @@ class SimpleApp(object):
             start_response("404 Not Found", html_headers)
             return ["No path %s found" % path]
 
-        if(fn_name == "choose_forum"):
-            return fn(environ, start_response,num)
+        if(fn_name == "choose_form"):
+            return fn(environ, start_response, num)
         else:
             return fn(environ, start_response)
             
@@ -271,22 +274,22 @@ class SimpleApp(object):
         start_response('200 OK', [('Content-type', content_type)])
         return [data]
         
-    def choose_forum(self, environ, start_response, num):
-        data = forums(num)
+    def choose_form(self, environ, start_response, num):
+        data = forms(num)
 
         start_response('200 OK', list(html_headers))
         return [data]
 
-    def forum(self, environ, start_response):
-        title = "forums"
+    def form(self, environ, start_response):
+        title = "forms"
         content = """<p>Hi What would you like to do?</p>
-        <p>Below you can see different forums, please choose one of them.</p>
+        <p>Below you can see different forms, please choose one of them.</p>
         <nav>
         <div class="navbox" style='display:block;margin-bottom:20px'>
                 <a href="/ml">Convert to ml</a>
             </div>
             <div class="navbox" style='display:block;margin-bottom:20px'>
-                <a href="/lt">Insert Liquor types</a>
+                <a href="/lt">Insert Liquor</a>
             </div>
             <div class="navbox" style='display:block;margin-bottom:20px'>
                 <a href="/in">Add to Inventory</a>
@@ -302,7 +305,7 @@ class SimpleApp(object):
         return [data] 
 
     def recv_ml(self, environ, start_response):
-        title = "ml forum";
+        title = "ml form";
         formdata = environ['QUERY_STRING']
         results = urlparse.parse_qs(formdata)
 
@@ -320,24 +323,239 @@ class SimpleApp(object):
         return [data]
 
     def recv_li(self, environ, start_response):
-        title = "liquor forum";
+        title = "liquor form";
+
+        #couldn't use jinja2 in begining because it is used in many
+        #place and I would have to change all of them
+        form = begining%(title,title) + """
+        <form action='recv_li'>
+        Manufacturer: <input type='text' name='mnf' size='10'>
+        Liquor: <input type='text' name='liq' size='10'>
+        Type: <input type='text' name='type' size='10'>
+        <input type='submit'>
+        </form>
+        <br>
+        """
+
         formdata = environ['QUERY_STRING']
         results = urlparse.parse_qs(formdata)
-
-        num = results['amount'][0]
-        unit = results['unit'][0]
-        if num.replace('.','',1).isdigit():
-            amount = num + ' '+ unit
-            r = db.convert_to_ml(amount)
-            content_type = 'text/html'
-            data = begining%(title,title) + "Amount: %.3f ml.  <a href='./'>return to index</a>" %(r)+ end
+        
+        try:
+            mnf = results['mnf'][0]
+            liq = results['liq'][0]
+            typ = results['type'][0]
+            bulbError = False 
+        except KeyError:
+            error = "<p style='color:red'>Please make fill all the blanks</p>" 
+            bulbError = True
+            
+        if (bulbError):
+            pass
         else:
-            data = "Please insert a valid value, which is a number. <a href='./'>return to index</a>" 
+            error = ""
+            db.add_bottle_type(mnf, liq, typ)
 
+        content_type = 'text/html'
+
+        cnt = """ 
+        {% for typ in _bottle_types_db %}
+             <li>{{ typ[0] }}, {{ typ[1] }}, {{ typ[2] }}</li>
+        {% endfor %}
+        </ul> 
+        """
+
+        lst = Environment().from_string(cnt).render( _bottle_types_db = db._bottle_types_db)
+
+        data = form + error +"<ul>" + lst.encode('ascii','ignore') + end
         start_response('200 OK', list(html_headers))
         return [data]
 
+    def recv_in(self, environ, start_response):
+        title = "inv. form";
 
+        #couldn't use jinja2 in begining because it is used in many
+        #place and I would have to change all of them
+        form = begining%(title,title) + """
+        <form action='recv_in'>
+        Manufacturer: <input type='text' name='mnf' size='10'>
+        Liquor: <input type='text' name='liq' size='10'>
+        Amount: <input type='text' name='amount' size='10'>
+        unit: <select name="unit">
+                <option value="oz"> oz</option>
+                <option value="gallon">gallon</option>
+                <option value="liter">liter</option>
+            </select>
+        <input type='submit'>
+        </form>
+        <br>
+        """
+        error = ""
+
+        formdata = environ['QUERY_STRING']
+        results = urlparse.parse_qs(formdata)
+
+        try:
+            mnf = results['mnf'][0]
+            liq = results['liq'][0]
+            num = results['amount'][0]
+            unit = results['unit'][0]
+            bulbError =False 
+        except KeyError:
+            error = "<p style='color:red'>Please make fill all the blanks</p>" 
+            bulbError = True
+            
+        if(bulbError):
+            pass
+        elif (not num.replace('.','',1).isdigit()):
+            error = "<p style='text-color:red'>Please enter a number</p>" 
+        else:
+            amount = num + ' '+ unit
+            ml_amount = db.convert_to_ml(amount)
+            content_type = 'text/html'
+
+            try:
+                db.add_to_inventory(mnf, liq, amount)
+            except db.LiquorMissing:
+                error = " <p style='background:red'>Error: This liquor type is not found in our records, please add it in the liquor types form</p>"
+
+        content_type = 'text/html'
+
+        cnt = """ 
+        <tr>
+        <td><strong>Manufacturer</strong></td>
+        <td><strong>Liquor</strong></td>
+        <td><strong>Amount</strong></td>
+        </tr>
+
+        {% for key in inventory %}
+             <tr>
+             <td>{{ key[0] }}</td>
+             <td>{{ key[1] }}</td>
+             <td>{{ inventory[key] }} ml</td>
+             </tr>
+        {% endfor %}
+        </table> 
+        """
+
+        lst = Environment().from_string(cnt).render( inventory = db._inventory_db)
+
+        data = form + error +"<table border='1'  margin='50px'>" + lst.encode('ascii','ignore') + end
+        start_response('200 OK', list(html_headers))
+        return [data]
+
+    def recv_re(self, environ, start_response):
+        title = "recipe form";
+
+        form =  """ 
+        <form action='recv_re_2'>
+            Name: <input type='text' name='name' size='10'>
+			<br>
+        {% for i in range( r[0] ) %}
+            Comp. name: <input type='text' name='Compname' size='10'>
+            Amount: <input type='text' name='amount' size='10'>
+            unit: <select name="unit">
+                    <option value="oz"> oz</option>
+                    <option value="gallon">gallon</option>
+                    <option value="liter">liter</option>
+                </select>
+        {% endfor %}
+        {{ maxi }}
+            <input type='submit'>
+        </form>
+        <br>
+        """
+        error = ""
+        content_type = 'text/html'
+
+        #parsing vars
+        formdata = environ['QUERY_STRING']
+        results = urlparse.parse_qs(formdata)
+        
+        #Here we check that they are not blank
+        #If they are we print an error message
+        try:
+            n = results['num'][0]
+            bulbError =False 
+        except KeyError:
+            error = "<p style='color:red'>Please make fill all the blanks<a href='\recv_re'>go back!</a></p>" 
+            bulbError = True
+           
+        #Here we check that the number is a digit
+        if(bulbError):
+            pass
+        elif (not n.replace('.','',1).isdigit()):
+            error = "<p style='text-color:red'>Please enter a number <a href='\recv_re'>go back!</a></p>" 
+
+        
+        #here we render the jinja template
+        frm = Environment().from_string(form).render(r= [int(n)])
+
+        data = begining%(title,title) +error + frm.encode('ascii','ignore') + end
+        start_response('200 OK', list(html_headers))
+        return [data]
+ 
+    def recv_re_2(self, environ, start_response):
+        title = "recipe form";
+
+        error = ""
+
+        #parsing vars
+        formdata = environ['QUERY_STRING']
+        results = urlparse.parse_qs(formdata)
+
+        try:
+            name = results['name'][0]
+            Compname = results['Compname']
+            amnt = results['amount']
+            unit = results['unit']
+            bulbError =False 
+        except KeyError:
+            error = "<p style='color:red'>Please make fill all the blanks</p>" 
+            bulbError = True
+
+        if(bulbError):
+            pass
+        elif (not amnt[0].replace('.','',1).isdigit()):
+            error = "<p style='text-color:red'>Please enter a number</p>" 
+        else:
+            totalA = []
+            i = 0
+            for a in amnt:
+                amount = a + ' '+ unit[i]
+                ml_amount = db.convert_to_ml(amount)
+                content_type = 'text/html'
+                m = '%.3f' %ml_amount + ' ' + 'ml'
+                totalA.append(m)
+                i += 1
+            print 'totalA', totalA
+
+        cmpt = []
+        i = 0
+        for c in Compname:
+            cmpt.append((c,totalA[i]))
+            i += 1
+
+        print 'cmpt:',cmpt
+        r = recipes.Recipe(name, cmpt)
+        db.add_recipe(r)
+
+        content_type = 'text/html'
+
+        cnt = """ 
+        <ul>
+        {% for key in recipes %}
+            <li> {{ key }} </li>
+        {% endfor %}
+        </ul> 
+        """
+
+        lst = Environment().from_string(cnt).render(recipes = db._recipes_db)
+        
+        data = begining%(title,title) +error + lst.encode('ascii','ignore') + end
+            
+        start_response('200 OK', list(html_headers))
+        return [data]
+     
     def dispatch_rpc(self, environ, start_response):
         # POST requests deliver input data via a file-like handle,
         # with the size of the data specified by CONTENT_LENGTH;
@@ -378,27 +596,8 @@ class SimpleApp(object):
         return str(response)
 
     def rpc_convert_units_to_ml(self,amount):
-        if("ml") in amount:
-            amount = amount.strip('ml')
-            amount = amount.strip()
-            result = float(amount)
-        elif("oz") in amount:
-            amount = amount.strip('oz')
-            amount = amount.strip()
-            result = (float(amount)*29.5735)#1 oz=29.57ml
-        elif("gallon") in amount:
-            amount = amount.strip('gallon')
-            amount = amount.strip()
-            result = (float(amount)*3785.41)
-        elif("liter") in amount:
-            amount = amount.strip('liter')
-            amount = amount.strip()
-            result = (float(amount)*1000)
-        else:
-            assert 0, amount
-
-        return result 
-
+        return db.convert_to_ml(amount)
+ 
     def rpc_recipes_names(self):
         recp = ['hello']
         for k,v in db._recipes_db.iteritems():
@@ -413,10 +612,57 @@ class SimpleApp(object):
 
         return inv
 
-def forums(C):
+    def rpc_add_liquor_type(self,liquorT):
+        #lqr = (maf,lqr,typ)
+        #Check if they were empty
+        bulbError = False 
+        try:
+            maf = liquorT[0]
+            lqr = liquorT[1]
+            typ = liquorT[2]
+        except KeyError:
+            bulbError = True
+            
+        if (bulbError):
+            pass
+        else:
+            db.add_bottle_type(maf, lqr, typ)
+
+        return (not bulbError)
+
+    def rpc_add_to_inventory(self,bottle):
+        error = "Added successfully"
+        bulbError = False 
+        #Check if they were empty
+        try:
+            maf = bottle[0]
+            lqr = bottle[1]
+            amnt = bottle[2]
+        except KeyError:
+            error = "Adding failed: make sure all required vars are given"
+            bulbError = True
+            
+        if (bulbError):
+            pass
+        else:
+            try:
+                db.add_to_inventory(maf, lqr, amnt)
+            except db.LiquorMissing:
+                error = "Adding failed: the Liquor is missing, please add it to list of liquor types"
+                bulbError = True
+
+        return error 
+ 
+    def rpc_add_recipe(self, name, compts):
+        r = recipes.Recipe(name, compts)
+        db.add_recipe(r)
+
+        return True
+
+def forms(C):
     #convert to ml
     if (C == 1):
-        title = "ml forum"
+        title = "ml form"
         return begining%(title,title) + """
     <form action='recv_ml'>
     Amount: <input type='text' name='amount' size'10'>
@@ -430,7 +676,7 @@ def forums(C):
     """ + end
     #This is for the liquor types
     elif (C == 2):
-        title = "liquor forum"
+        title = "liquor form"
         return begining%(title,title) + """
         <form action='recv_li'>
         Manufacturer: <input type='text' name='mnf' size='10'>
@@ -442,9 +688,9 @@ def forums(C):
 
     #This is for the inventory 
     elif (C == 3):
-        title = "inventory forum"
+        title = "inventory form"
         return begining%(title,title) + """
-        <form action='recv'>
+        <form action='recv_in'>
         Manufacturer: <input type='text' name='mnf' size='10'>
         Liquor: <input type='text' name='liq' size='10'>
         Amount: <input type='text' name='amount' size='10'>
@@ -459,73 +705,14 @@ def forums(C):
    
     #This is for the reciepes 
     elif (C == 4):
-        title = "recipe forum"
+        title = "recipe form"
         return begining%(title,title) + """
-        <form action='recv'>
-        Name: <input type='text' name='name' size='10'>
-        Amount: <input type='text' name='amount' size='10'>
-        unit: <select name="unit">
-                <option value="oz"> oz</option>
-                <option value="gallon">gallon</option>
-                <option value="liter">liter</option>
-            </select>
-        <input type="button" class="btn"/>
-        <script>
-
-
-        </script>
-        <input type='submit'>
+        <form action='recv_re'>
+            Please enter the number of Components: <input type='text' name='num' size='10'>
+            <input type='submit'>
         </form>
         """ + end
 
     else:
         return " "
     
-
-#change the forums
-#def forum_li():
-#    title = "liquor forum"
-#    return begining%(title,title) + """
-#<form action='recv'>
-#Manufacturer: <input type='text' name='mnf' size='10'>
-#Liquor: <input type='text' name='liq' size='10'>
-#Type: <input type='text' name='type' size='10'>
-#<input type='submit'>
-#</form>
-#""" + end
-
-#def forum_in():
-#    title = "inventory forum"
-#    return begining%(title,title) + """
-#<form action='recv'>
-#Manufacturer: <input type='text' name='mnf' size='10'>
-#Liquor: <input type='text' name='liq' size='10'>
-#Amount: <input type='text' name='amount' size='10'>
-#unit: <select name="unit">
-#        <option value="oz"> oz</option>
-#        <option value="gallon">gallon</option>
-#        <option value="liter">liter</option>
-#    </select>
-#<input type='submit'>
-#</form>
-#""" + end
-
-#def forum_re():
-#    title = "forum"
-#    return begining%(title,title) + """
-#<form action='recv'>
-#Name: <input type='text' name='name' size='10'>
-#Amount: <input type='text' name='amount' size='10'>
-#unit: <select name="unit">
-#        <option value="oz"> oz</option>
-#        <option value="gallon">gallon</option>
- #       <option value="liter">liter</option>
-#    </select>
-#<input type="button" class="btn"/>
-#<script>
-#
-#
-#</script>
-#<input type='submit'>
-#</form>
-#""" + end

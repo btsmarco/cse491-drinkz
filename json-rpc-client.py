@@ -33,5 +33,13 @@ if __name__ == '__main__':
 
     print 'Convert to ml!', call_remote(server_base,method='convert_units_to_ml', params=['1 oz' ], id=1)
     
+    print 'add_liquor_type:', call_remote(server_base, method='add_liquor_type',params=[("Marco Botros","vodka","like the moon")], id=1)
+
+    print 'add_to_inventory:', call_remote(server_base, method='add_to_inventory',params=[("Marco Botros","vodka","3 oz")], id=1)
+ 
+    print 'add_recipe:', call_remote(server_base, method='add_recipe',params=['The DUDE',[("Marco Botros","3 oz"),('vodka','1 liter')]], id=1)
+   
     print 'recipes_names:', call_remote(server_base, method='recipes_names', params=[], id=1)
+
     print 'liquor_inventory:', call_remote(server_base, method='liquor_inventory', params=[], id=1)
+
