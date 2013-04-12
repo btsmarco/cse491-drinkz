@@ -23,7 +23,7 @@ def T_Simple_GET():
         reply += buf
 
     assert reply.find("Hi there! This is my app"), t
-    print reply
+    print "The straight up GET test: passed"
     sys.stdout.flush()
     s.close()
 
@@ -35,9 +35,7 @@ def T_GET_Form():
     s.connect((hostname , int(port)))
 
     #asking the server for the index page
-    s.send("GET /form HTTP/1.0\r\n\r\n")
-    
-    s.send('I am good')
+    s.send("GET /recv?in=good HTTP/1.0\r\n\r\n")
 
     reply = "" 
     #grabs pieces until there is no more info to grab
@@ -47,9 +45,10 @@ def T_GET_Form():
            break 
         reply += buf
 
-    print reply 
-
+    assert reply.find('good')
+    assert reply.find('form')
     sys.stdout.flush()
+    print "The form submission GET test: passed"
     s.close()
 
 def T_GET_PIC():
@@ -79,12 +78,14 @@ def T_GET_PIC():
     size = pic.tell()
     
     assert os.path.exists('Recieved-Spartan-helmet.gif')
+    assert os.path.getsize('Recieved-Spartan-helmet.gif') == 2399
     assert size == 2399, size
 
-    pic.close
+    pic.close()
 
     #Test see if a file exsists and how many bytes does it have
     sys.stdout.flush()
+    print "The image retrieval test: passed"
     s.close()
 
 

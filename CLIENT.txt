@@ -1,0 +1,1 @@
+To run the tests for myApp, run the app.py and use the hostname and the port to run test_MyApp.py. The hostname and the port should be seperated by a space. It is just like grab-page in hw4
