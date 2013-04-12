@@ -1,0 +1,21 @@
+This is a set of features for HW6
+
+Story:
+Mack is looking for a good party. He gets invited to 2 parties. He goes to our app enters the name of the parties to check them (can't access any party without its name). He gets to see some of the song that will be played and genres. He also gets to see their Liquor cabinet, crash spots, open resturants close to the location and location. 
+
+Features:
+1. Store named parties.
+2. A party has few things assigned to it:
+	a. Music
+	b. Liquor Cabinet
+	c. crash spots
+	d. open resturants 
+	e. location
+	d. Host and contact info
+3. Send suggestions to the Host for the Music, Liquor Cabinet (he will bring)...etc
+
+Data storage functionality:
+(*)Bulk load for parties and their properties.
+(*)Add input to categories individually
+(*)Add suggestions(from website) to certain categories that will be viewed by the Host
+(*) Retrieve parties and their properties (in a dictionary form maybe)
