@@ -11,7 +11,7 @@ def test_rpc_convert():
     encoded = simplejson.dumps(d)
     environ['wsgi.input'] = StringIO(encoded) 
     environ['CONTENT_LENGTH'] = len(encoded) 
-    environ['REQUEST_METHOD'] = 'convert_to_units_mlPOST' 
+    environ['REQUEST_METHOD'] = 'POST' 
    
     #making a start_response function 
     d = {}
@@ -40,7 +40,7 @@ def test_rpc_recipes():
     encoded = simplejson.dumps(d)
     environ['wsgi.input'] = StringIO(encoded) 
     environ['CONTENT_LENGTH'] = len(encoded) 
-    environ['REQUEST_METHOD'] = 'recipes_namesPOST' 
+    environ['REQUEST_METHOD'] = 'POST' 
    
     #making a start_response function 
     d = {}
