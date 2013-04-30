@@ -1,9 +1,19 @@
 from wsgiref.simple_server import make_server
-import urlparse, simplejson, db, recipes, os
+from Cookie import SimpleCookie
+import urlparse, simplejson, db, recipes, os, uuid, jinja2
 from jinja2 import Environment  
+
+loader = jinja2.FileSystemLoader('/user/botrosma/cse491/cse491-drinkz/drinkz/templates')
+env = jinja2.Environment(loader=loader)
+
+usernames = {}
 
 dispatch = {
     '/' : 'index',
+    '/login_1' : 'login1',
+    '/login1_process' : 'login1_process',
+    '/logout' : 'logout',
+    '/status' : 'status',
     '/recipes' : 'recipes',
     '/ajaxform' : 'ajaxform',
     '/error' : 'error',
@@ -175,6 +185,7 @@ end = """ 	</article>
 		<img id="bottom" src="signituretrans.png" alt="signiture"/>
 	</body>
 </html>"""
+
 class SimpleApp(object):
     def __call__(self, environ, start_response):
         path = environ['PATH_INFO']
@@ -201,7 +212,8 @@ class SimpleApp(object):
     def index(self, environ, start_response):
         title = "Drinkz"
         content = """<p>Hi this Project 4 for CSE 491, hopefully you enjoy it :D</p>
-        <input type="button" onclick="alertThem()" value="Show alert box">"""
+        <input type="button" onclick="alertThem()" value="Show alert box">
+        <p> Please login <a href='/login_1'> here </a></p>"""
         data = begining % (title,title) + content + end 
         #for the image in the bottom
         #pic = open('sp.png', 'rb').read()
@@ -211,6 +223,69 @@ class SimpleApp(object):
         start_response('200 OK', list(html_headers))
         #start_response('200 OK', headers)
         return [data] 
+
+    def login1(self, environ, start_response):
+        start_response('200 OK', list(html_headers))
+
+        title = 'login'
+        template = env.get_template('login1.html')
+        return str(template.render(locals()))
+
+    def login1_process(self, environ, start_response):
+        formdata = environ['QUERY_STRING']
+        results = urlparse.parse_qs(formdata)
+
+        name = results['name'][0]
+        content_type = 'text/html'
+
+        # authentication would go here -- is this a valid username/password,
+        # for example?
+
+        k = str(uuid.uuid4())
+        usernames[k] = name
+
+        headers = list(html_headers)
+        headers.append(('Location', '/status'))
+        headers.append(('Set-Cookie', 'name1=%s' % k))
+
+        start_response('302 Found', headers)
+        return ["Redirect to /status..."]
+
+    def logout(self, environ, start_response):
+        if 'HTTP_COOKIE' in environ:
+            c = SimpleCookie(environ.get('HTTP_COOKIE', ''))
+            if 'name1' in c:
+                key = c.get('name1').value
+                name1_key = key
+
+                if key in usernames:
+                    del usernames[key]
+                    print 'DELETING'
+
+        pair = ('Set-Cookie',
+                'name1=deleted; Expires=Thu, 01-Jan-1970 00:00:01 GMT;')
+        headers = list(html_headers)
+        headers.append(('Location', '/status'))
+        headers.append(pair)
+
+        start_response('302 Found', headers)
+        return ["Redirect to /status..."]
+
+    def status(self, environ, start_response):
+        start_response('200 OK', list(html_headers))
+
+        name1 = ''
+        name1_key = '*empty*'
+        if 'HTTP_COOKIE' in environ:
+            c = SimpleCookie(environ.get('HTTP_COOKIE', ''))
+            if 'name1' in c:
+                key = c.get('name1').value
+                name1 = usernames.get(key, '')
+                name1_key = key
+                
+        title = 'login status'
+        template = env.get_template('status.html')
+        return str(template.render(locals()))
 
     def recipes(self, environ, start_response):
         title = "recipes"
