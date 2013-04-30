@@ -560,6 +560,7 @@ class SimpleApp(object):
         # POST requests deliver input data via a file-like handle,
         # with the size of the data specified by CONTENT_LENGTH;
         # see the WSGI PEP.
+        print environ
         if environ['REQUEST_METHOD'].endswith('POST'):
             body = None
             if environ.get('CONTENT_LENGTH'):

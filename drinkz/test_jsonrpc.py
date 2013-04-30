@@ -1,4 +1,4 @@
-import app, urllib, db, simplejson 
+import app, urllib, urllib2, db, simplejson 
 from cStringIO import StringIO
 from drinkz import recipes
 
@@ -8,9 +8,9 @@ def test_rpc_convert():
     environ = {}
     environ['PATH_INFO'] = '/rpc'
     d = dict(method= 'convert_units_to_ml',params=['1 oz'], id=1)
-    encoded = simplejson.dumps(d)
-    environ['wsgi.input'] = StringIO(encoded) 
-    environ['CONTENT_LENGTH'] = len(encoded) 
+    dataE = simplejson.dumps(d)
+    environ['wsgi.input'] = StringIO(dataE) 
+    environ['CONTENT_LENGTH'] = len(dataE) 
     environ['REQUEST_METHOD'] = 'POST' 
    
     #making a start_response function 
