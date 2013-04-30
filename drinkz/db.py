@@ -18,7 +18,6 @@ try:
 except OSError:
     pass
 
-
 db = sqlite3.connect('inv.db')
 c = db.cursor()
 
@@ -33,11 +32,6 @@ def _reset_db():
     c.execute('DELETE FROM bottle_types')
     c.execute('DELETE FROM inventory')
     c.execute('DELETE FROM recipes')
-
-    global _bottle_types_db, _inventory_db , _recipes_db
-    _bottle_types_db = set([])
-    _inventory_db = {}
-    _recipes_db = {}
 
 def save_db(filename):
     fp = open(filename, 'wb')
@@ -87,7 +81,6 @@ def add_to_inventory(mfg, liquor, amount):
 
     c.execute('SELECT * FROM inventory')
     inventory_db = c.fetchall()
-    print inventory_db
 
     if not _check_bottle_type_exists(mfg, liquor):
         err = "Missing liquor: manufacturer '%s', name '%s'" % (mfg, liquor)
@@ -110,21 +103,6 @@ def add_to_inventory(mfg, liquor, amount):
             c.execute('INSERT INTO inventory (mnf,lqr,amnt) VALUES(?,?,?)',(mfg, liquor, num))
     db.commit()
 
-######## To remove
-    if not _check_bottle_type_exists(mfg, liquor):
-        err = "Missing liquor: manufacturer '%s', name '%s'" % (mfg, liquor)
-        raise LiquorMissing(err)
-    else:
-        if (mfg, liquor) in _inventory_db:
-            amounts = _inventory_db[(mfg, liquor)] 
-            num = convert_to_ml(amount)
-
-            _inventory_db[(mfg, liquor)] = amounts + num 
-        else:
-            num = convert_to_ml(amount)
-
-            _inventory_db[(mfg, liquor)] = num
-
     # just add it to the inventory database as a tuple, for now.
     #_inventory_db.append((mfg, liquor, amount))
 
@@ -143,8 +121,6 @@ def get_liquor_amount(mfg, liquor):
     c.execute('SELECT amnt FROM inventory WHERE mnf=? AND lqr=?',(mfg,liquor))
     amnt = c.fetchall()[0][0]
 
-    amounts = _inventory_db[(mfg, liquor)] 
-
     return amnt
 
 def get_liquor_inventory():
@@ -153,9 +129,6 @@ def get_liquor_inventory():
     inventory_db = c.fetchall()
     for (m, l,_) in inventory_db:
         yield m, l
-
-    #for (m, l) in _inventory_db:
-    #    yield m, l
 
 def show_liquor_amounts():
     "Print all the liquor types and amounts in the inventory. "
@@ -181,7 +154,6 @@ def add_recipe(r):
     if bulb:
         pck = cPickle.dumps(r.comp)
         c.execute('INSERT INTO recipes (name,cmpts) VALUES(?,?)',(r.name,pck))
-      #  _recipes_db[r.name] = r
     else:
         err = "Sorry the name %s is already used, please use a different name."%r.name
         raise DuplicateRecipeName(err)
@@ -195,10 +167,6 @@ def get_recipe(name):
         if name in rec[0]:
             return Recipe(name,cPickle.loads(str(rec[1])))
     return 0
-    #if(name in _recipes_db.keys()):
-    #    return _recipes_db[name]
-    #else:
-    #    return 0
 
 def get_all_recipes():
     """ returns the whole dictionary of recipes or a list of recipes"""

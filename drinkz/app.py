@@ -1,10 +1,11 @@
 from wsgiref.simple_server import make_server
-import urlparse, simplejson, db, recipes
+import urlparse, simplejson, db, recipes, os
 from jinja2 import Environment  
 
 dispatch = {
     '/' : 'index',
     '/recipes' : 'recipes',
+    '/ajaxform' : 'ajaxform',
     '/error' : 'error',
     '/inventory' : 'inventory',
     '/liquor_types' : 'liquor_types',
@@ -231,6 +232,14 @@ class SimpleApp(object):
         start_response('200 OK', list(html_headers))
         return [data]
  
+    def ajaxform(self, environ, start_response):
+        title = "formAjax"
+        os.chdir(r'/user/botrosma/cse491/cse491-drinkz/drinkz')
+        content = open('ajaxform.html').read() 
+        data = begining % (title,title) + content + end 
+        start_response('200 OK', list(html_headers))
+        return [content]
+
     def inventory(self, environ, start_response):
         title = "inventory"
         content = """<table border='1' margin='50px'>
@@ -664,17 +673,10 @@ def forms(C):
     #convert to ml
     if (C == 1):
         title = "ml form"
-        return begining%(title,title) + """
-    <form action='recv_ml'>
-    Amount: <input type='text' name='amount' size'10'>
-    unit: <select name="unit">
-            <option value="oz"> oz</option>
-            <option value="gallon">gallon</option>
-            <option value="liter">liter</option>
-        </select>
-    <input type='submit'>
-    </form>
-    """ + end
+        os.chdir(r'/user/botrosma/cse491/cse491-drinkz/drinkz')
+        content = open('ajaxform.html').read() 
+        return begining%(title,title) + content +end 
+
     #This is for the liquor types
     elif (C == 2):
         title = "liquor form"
