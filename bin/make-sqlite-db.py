@@ -1,5 +1,5 @@
 import sqlite3, os
-import cPickle
+
 try:
     os.unlink('../drinkz/inv.db')
 except OSError:

@@ -6,24 +6,27 @@ a key and the recipe as a value.
 """
 import math, sqlite3, os, cPickle
 from recipes import Recipe
+from parties import Party 
 from cPickle import dump, load
 
-# private singleton variables at module level
-_bottle_types_db = set([])
-_inventory_db = {}
-_recipes_db = {}
 
 try:
-    os.unlink('../drinkz/inv.db')
+    os.unlink('inv.db')
 except OSError:
     pass
 
 db = sqlite3.connect('inv.db')
 c = db.cursor()
 
-#c.execute('CREATE TABLE bottle_types (mnf TEXT, lqr TEXT, typ TEXT)')
-#c.execute('CREATE TABLE inventory (mnf TEXT, lqr TEXT, amnt FLOAT)')
-#c.execute('CREATE TABLE recipes (name TEXT, cmpts TEXT)')
+pdb = sqlite3.connect('parties.db')
+p = pdb.cursor()
+
+
+c.execute('CREATE TABLE bottle_types (mnf TEXT, lqr TEXT, typ TEXT)')
+c.execute('CREATE TABLE inventory (mnf TEXT, lqr TEXT, amnt FLOAT)')
+c.execute('CREATE TABLE recipes (name TEXT, cmpts TEXT)')
+
+#p.execute('CREATE TABLE parties (HName TEXT,HNum TEXT, loc TEXT, date TEXT,crash INTEGER, inv TEXT, music TEXT, restu TEXT)')
 db.commit()
 
 
@@ -33,6 +36,10 @@ def _reset_db():
     c.execute('DELETE FROM inventory')
     c.execute('DELETE FROM recipes')
 
+    p.execute('DELETE FROM properties')
+    p.execute('DELETE FROM inventory')
+    p.execute('DELETE FROM music')
+    p.execute('DELETE FROM resturants')
 def save_db(filename):
     fp = open(filename, 'wb')
 
@@ -63,9 +70,8 @@ class CorruptLine(Exception):
 
 def add_bottle_type(mfg, liquor, typ):
     "Add the given bottle type into the drinkz database."
-    _bottle_types_db.add((mfg, liquor, typ))
     c.execute('INSERT INTO bottle_types (mnf,lqr,typ) VALUES (?,?,?)',(mfg, liquor, typ))
-    db.commit
+    db.commit()
 
 def _check_bottle_type_exists(mfg, liquor):
     c.execute('SELECT * FROM bottle_types')
@@ -226,4 +232,32 @@ def check_available_recipes():
             av.append(r)
     
     return av 
+
+def add_party(party):
+    """adding the party into the database of paries with"""
+    lqr = cPickle.dumps(party.lqr_cab)
+    music = cPickle.dumps(party.music)
+    restu = cPickle.dumps(party.restu)
+    p.execute('INSERT INTO parties (HName,HNum,loc,date,crash,inv,music,restu)VALUES(?,?,?,?,?,?,?,?)',(party.H_name,party.H_num,party.loc,party.date,party.crash,lqr,music,restu))
+    db.commit()
+
+def get_party(HName):
+    """returns a party"""
+    p.execute('SELECT * FROM parties')
+    parties_db = p.fetchall()
+    
+    for par in parties_db:
+        if HName == par[0]:
+            return Party(par[2],par[0],par[1],par[3],par[4],cPickle.loads(str(par[5])),cPickle.loads(str(par[6])),cPickle.loads(str(par[7])))
+    return 0
+
+def get_all_parties():
+    """ returns the whole dictionary of recipes or a list of recipes"""
+    p.execute('SELECT * FROM parties')
+    parties_db = p.fetchall()
+
+    for par in parties_db:
+        party = get_party(par[0]) 
+        yield party
+
 
