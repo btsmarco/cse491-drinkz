@@ -12,17 +12,12 @@ from cPickle import dump, load
 if __name__ == '__main__':
     os.chdir(r'/user/botrosma/cse491/cse491-drinkz/drinkz')
 
-db = sqlite3.connect('inv.db')
+db = sqlite3.connect('/user/botrosma/cse491/cse491-drinkz/drinkz/inv.db')
 c = db.cursor()
 
-pdb = sqlite3.connect('parties.db')
+pdb = sqlite3.connect('/user/botrosma/cse491/cse491-drinkz/drinkz/parties.db')
 p = pdb.cursor()
 
-#c.execute('CREATE TABLE bottle_types (mnf TEXT, lqr TEXT, typ TEXT)')
-#c.execute('CREATE TABLE inventory (mnf TEXT, lqr TEXT, amnt FLOAT)')
-#c.execute('CREATE TABLE recipes (name TEXT, cmpts TEXT)')
-
-#p.execute('CREATE TABLE parties (HName TEXT,HNum TEXT, loc TEXT, date TEXT,crash INTEGER, inv TEXT, music TEXT, restu TEXT)')
 
 def _reset_db():
     "A method only to be used during testing -- toss the existing db info."
@@ -41,50 +36,31 @@ def prepare_parties():
 
 #Not sure if they are of any use now
 def save_db(filename):
-    if __name__ == '__main__':
-        os.chdir(r'/user/botrosma/cse491/cse491-drinkz/drinkz')
-#    f1 = filename +'_inv.db'
-#    f2 = filename +'_parties.db'
-#    shutil.copy('inv.db',f1)
-#    shutil.copy('parties.db',f2)
-#    fp = open(filename, 'wb')
+    f1 ='/user/botrosma/cse491/cse491-drinkz/drinkz/' + filename +'_inv.db'
+    f2 = '/user/botrosma/cse491/cse491-drinkz/drinkz/' + filename +'_parties.db'
+    
+    os.unlink(f1)
+    os.unlink(f2)
 
-#    tosave = (_bottle_types_db, _inventory_db, _recipes_db)
-#    dump(tosave, fp)
-
-#    fp.close()
+    shutil.copy('/user/botrosma/cse491/cse491-drinkz/drinkz/inv.db',f1)
+    shutil.copy('/user/botrosma/cse491/cse491-drinkz/drinkz/parties.db',f2)
 
 def load_db(filename):
-    try:
-        os.unlink('inv.db')
-    except OSError:
-        pass
-    try:
-        os.unlink('parties.db')
-    except OSError:
-        pass
+    os.unlink('/user/botrosma/cse491/cse491-drinkz/drinkz/inv.db')
+    os.unlink('/user/botrosma/cse491/cse491-drinkz/drinkz/parties.db')
 
-#    f1 = filename +'_inv.db'
-#    f2 = filename +'_parties.db'
+    f1 ='/user/botrosma/cse491/cse491-drinkz/drinkz/' + filename +'_inv.db'
+    f2 = '/user/botrosma/cse491/cse491-drinkz/drinkz/' + filename +'_parties.db'
 
- #   os.unlink(f1)
- #   os.unlink(f2)
- #   shutil.copy(f1,'inv.db')
- #   shutil.copy(f2,'parties.db')
+    shutil.copy(f1,'/user/botrosma/cse491/cse491-drinkz/drinkz/inv.db')
+    shutil.copy(f2,'/user/botrosma/cse491/cse491-drinkz/drinkz/parties.db')
 
-    db = sqlite3.connect('inv.db')
+    db = sqlite3.connect('/user/botrosma/cse491/cse491-drinkz/drinkz/inv.db')
     c = db.cursor()
 
-    pdb = sqlite3.connect('parties.db')
+    pdb = sqlite3.connect('/user/botrosma/cse491/cse491-drinkz/drinkz/parties.db')
     p = pdb.cursor()
 
-#    global _bottle_types_db, _inventory_db, _recipes_db
-#    fp = open(filename, 'rb')
-
-#    loaded = load(fp)
-#    (_bottle_types_db, _inventory_db, _recipes_db) = loaded
-
- #   fp.close()
 
 # exceptions in Python inherit from Exception and generally don't need to
 # override any methods.
