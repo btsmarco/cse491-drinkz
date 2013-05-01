@@ -1,9 +1,154 @@
+
+<!DOCTYPE html>
 <html>
-<head>
-<title>{{ title|e }}</title>
-</head>
-<body>
-{% block content %}
-{% endblock %}
-</body>
+	<head>
+		<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+        <title> {{ title|e }} </title>
+        <script>
+            function alertThem(){
+                alert("Hi you are awesome");
+            }
+        </script>
+        <style type="text/css"> 
+            h2{
+                color: #B0171F;
+            }
+            html, body{
+                height:100%%;
+            }
+            .wrapper{
+                width:auto;
+            }
+            .container{
+                background:white;
+                min-height:100%%;
+                padding:30px 50px 50px 30px ;
+                width:650px;
+            	margin-left:auto;
+                margin-right:auto;
+                border:5px solid;
+                border-color:#ECC201;
+            }
+            .container2{
+                border-color:#0E78A0 !important;
+            }
+            .link{
+                font-family: 'Open sans', sans-serif;
+                text-align:center;
+                font-size: 30px;
+            }
+            a:link{
+                text-decoration:none;
+                color:#63B8FF;
+            }
+            article{
+                font-family: 'Beunard', serif;
+                font-size: 20px;
+            }
+            .note{
+                font-family: 'Beunard', serif;
+                font-size: 20px;
+                color:#B0171F;
+            }
+            .icon{
+                width:130px;
+                height:auto;
+                position:absolute;
+                margin-top:150px;
+                margin-left:80px;
+                border:1px solid;
+            }
+            .icon:hover{
+                background:white;
+            }
+            #bottom{
+                width:130px;
+                height:auto;
+                border:5px solid;
+                margin-top:-70px;
+                margin-left:50px;
+                background: white;
+                border-color:#0E78A0 !important;
+            }
+            .navbox{
+                display:inline;
+                background: black;
+                width:150px;
+                height:30px;
+                color:white;
+                text-decoration:none;
+                font-size:20px;
+                text-align:center;
+                padding:0 10px;
+                margin-right:5px;
+            }
+            .navbox:hover{
+                opacity:0.7;
+            }
+            a:visited{
+                color:white;
+            }
+            nav{
+                margin-top:20px;
+                margin-bottom:40px;
+            }
+            footer{
+                position:absolute;
+                margin-top:560px;
+                margin-left:900px;
+                color:white;
+            }
+            .head{
+                font-size:90px;
+                margin-top:-120px;
+                margin-bottom:0;
+                color:#6FC3C1;
+            }
+            .head2{
+                font-size:90px;
+                margin-top:-120px;
+                margin-bottom:0;
+                color:#77BF42;
+            }
+            body{
+                width:700px;
+                min-height:100%%;
+                margin-left:auto;
+                margin-right:auto;
+                margin-top:100px;
+            }
+        </style>
+
+    </head>
+	<body>
+		<div class="container">
+            <h1 class="head">{{ title|e }}</h1>
+			<nav>
+				<div class="navbox">
+					<a href="/">Home</a>
+				</div>
+				<div class="navbox">
+					<a href="/recipes">Recipes</a>
+				</div>
+				<div class="navbox">
+					<a href="/inventory">Inventory</a>
+				</div>
+				<div class="navbox">
+					<a href="/liquor_types">Liquor types</a>
+				</div>
+           		<div class="navbox">
+					<a href="/form">Forms</a>
+				</div>
+				<div class="navbox">
+					<a href="/parties">Parties</a>
+				</div>
+			</nav>
+			<article>
+				{% block content %}
+				{% endblock %}
+			</article>
+		</div>
+	</body>
 </html>
+
+

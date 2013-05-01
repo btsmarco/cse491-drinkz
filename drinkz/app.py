@@ -20,6 +20,8 @@ dispatch = {
     '/inventory' : 'inventory',
     '/liquor_types' : 'liquor_types',
     '/form' : 'form',
+    '/parties':'party',
+    '/in_parties':'in_party',
     '/recv_ml' : 'recv_ml',
     '/recv_li' : 'recv_li',
     '/recv_in' : 'recv_in',
@@ -34,7 +36,7 @@ dispatch = {
 
 html_headers = [('Content-type', 'text/html')]
 
-db.load_db("Database")
+#db.load_db("Database")
 
 begining = """ \
 <!DOCTYPE html>
@@ -61,7 +63,7 @@ begining = """ \
                 background:white;
                 min-height:100%%;
                 padding:30px 50px 50px 30px ;
-                width:550px;
+                width:650px;
             	margin-left:auto;
                 margin-right:auto;
                 border:5px solid;
@@ -177,6 +179,10 @@ begining = """ \
            		<div class="navbox">
 					<a href="/form">Forms</a>
 				</div>
+				<div class="navbox">
+					<a href="/parties">Parties</a>
+				</div>
+
 			</nav>
             <article>""" 
 end = """ 	</article>
@@ -295,9 +301,10 @@ class SimpleApp(object):
         <td><strong>Available?</strong></td>
         </tr>
         """
-        for k,v in db._recipes_db.iteritems():
-            content += "<tr><td>%s</td><td> "%(k)
-            if (v.need_ingredients):
+        recipes = db.get_all_recipes()
+        for r in recipes:
+            content += "<tr><td>%s</td><td> "%(r.name)
+            if (r.need_ingredients):
                 content += "no"
             else:
                 content += "ya"
@@ -324,9 +331,10 @@ class SimpleApp(object):
         <td><strong>Amount</strong></td>
         </tr>
         """
-        for k,v in db._inventory_db.iteritems():
+        inventory = db.get_liquor_inventory()
+        for k in inventory:
             content += "<tr><td>%s </td><td>%s</td><td>%d ml\
-            </td></tr>"%(k[0],k[1],v)
+            </td></tr>"%(k[0],k[1],db.get_liquor_amount(k[0],k[1]))
         content += "</table>"
 
         data = begining % (title,title) + content + end 
@@ -336,12 +344,39 @@ class SimpleApp(object):
     def liquor_types(self, environ, start_response):
         title = "liquor"
         content = "<ul>"
-        for (mfg, lqr,typ) in db._bottle_types_db:
+        bottle_types = db.get_bottle_types()
+        for (mfg, lqr,typ) in bottle_types:
             content += "<li>%s, %s, %s</li>"%(mfg,lqr,typ)
         content += "</ul>" 
         data = begining % (title,title) + content + end 
         start_response('200 OK', list(html_headers))
         return [data]
+
+    def party(self, environ, start_response):
+        start_response('200 OK', list(html_headers))
+        
+        ps = db.get_all_parties_list()
+
+        title = 'parties'
+        template = env.get_template('parties.html')
+        return str(template.render(locals(),parties = ps))
+    
+    def in_party(self, environ, start_response):
+        """ Shows an individual party """
+        #parsing vars
+        formdata = environ['QUERY_STRING']
+        results = urlparse.parse_qs(formdata)
+       
+        Host = results['name'][0]
+        p = get_party(Host)
+        # Add a new part in the database called comments which is empty and then
+        # add as the people use the input box to add comments and rpc request
+        # that adds the comment to the database to show it here on the page
+        title = 'the party'
+        template = env.get_template('in_party.html')
+        return str(template.render(locals(),p = p, music = p.music, lqr = p.lqr,restu = p.restu))
+    
+
 
     def error(self, environ, start_response):
         status = "404 Not Found"
@@ -684,16 +719,18 @@ class SimpleApp(object):
         return db.convert_to_ml(amount)
  
     def rpc_recipes_names(self):
-        recp = ['hello']
-        for k,v in db._recipes_db.iteritems():
-            recp.append(k)
+        recp = []
+        recipes = db.get_all_recipes()
+        for k in recipes:
+            recp.append(k.name)
 
         return recp
 
     def rpc_liquor_inventory(self):
         inv = []
-        for k,v in db._inventory_db.iteritems():
-            inv.append(k)
+        inventory = db.get_liquor_inventory()
+        for k in inventory:
+            inv.append(k[0])
 
         return inv
 

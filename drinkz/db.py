@@ -4,16 +4,13 @@ I have choosen to store recipes in dictionaries, because it is very
 easy to get the ingredients of a recipe simply by using its name as 
 a key and the recipe as a value. 
 """
-import math, sqlite3, os, cPickle
+import math, sqlite3, os, cPickle, shutil
 from recipes import Recipe
 from parties import Party 
 from cPickle import dump, load
 
-
-try:
-    os.unlink('inv.db')
-except OSError:
-    pass
+if __name__ == '__main__':
+    os.chdir(r'/user/botrosma/cse491/cse491-drinkz/drinkz')
 
 db = sqlite3.connect('inv.db')
 c = db.cursor()
@@ -21,14 +18,11 @@ c = db.cursor()
 pdb = sqlite3.connect('parties.db')
 p = pdb.cursor()
 
-
-c.execute('CREATE TABLE bottle_types (mnf TEXT, lqr TEXT, typ TEXT)')
-c.execute('CREATE TABLE inventory (mnf TEXT, lqr TEXT, amnt FLOAT)')
-c.execute('CREATE TABLE recipes (name TEXT, cmpts TEXT)')
+#c.execute('CREATE TABLE bottle_types (mnf TEXT, lqr TEXT, typ TEXT)')
+#c.execute('CREATE TABLE inventory (mnf TEXT, lqr TEXT, amnt FLOAT)')
+#c.execute('CREATE TABLE recipes (name TEXT, cmpts TEXT)')
 
 #p.execute('CREATE TABLE parties (HName TEXT,HNum TEXT, loc TEXT, date TEXT,crash INTEGER, inv TEXT, music TEXT, restu TEXT)')
-db.commit()
-
 
 def _reset_db():
     "A method only to be used during testing -- toss the existing db info."
@@ -36,26 +30,61 @@ def _reset_db():
     c.execute('DELETE FROM inventory')
     c.execute('DELETE FROM recipes')
 
-    p.execute('DELETE FROM properties')
-    p.execute('DELETE FROM inventory')
-    p.execute('DELETE FROM music')
-    p.execute('DELETE FROM resturants')
+    p.execute('DELETE FROM parties')
+
+def prepare_parties():
+    p = parties.Party('251 river st, East Lansing MI, 48823','Josh Mac','5173338888','4 April 2013',5,[('radioactive','imagine dragons'),('titanium','guetta'),('gaungam style','Psy')],[('Johhny walker','black label','blended scotch'),('Rossi','extra dry vermouth','vermouth')],['taco bell','McDonels'])
+
+    p2 = parties.Party('288 bailey st, East Lansing MI, 48823','Amy Scott','5173562978','15 April 2013',2,[('Just give me a reason' ,'Pink Ruess'),('Carry On','Fun'),('Gentlemen','Psy')],[('Johhny walker','black label','blended scotch'),('Gray Goose','vodka','unflavored vodka')],['taco bell','picking express'])
+    add_party(p)
+    add_party(p2)
+
+#Not sure if they are of any use now
 def save_db(filename):
-    fp = open(filename, 'wb')
+    if __name__ == '__main__':
+        os.chdir(r'/user/botrosma/cse491/cse491-drinkz/drinkz')
+#    f1 = filename +'_inv.db'
+#    f2 = filename +'_parties.db'
+#    shutil.copy('inv.db',f1)
+#    shutil.copy('parties.db',f2)
+#    fp = open(filename, 'wb')
 
-    tosave = (_bottle_types_db, _inventory_db, _recipes_db)
-    dump(tosave, fp)
+#    tosave = (_bottle_types_db, _inventory_db, _recipes_db)
+#    dump(tosave, fp)
 
-    fp.close()
+#    fp.close()
 
 def load_db(filename):
-    global _bottle_types_db, _inventory_db, _recipes_db
-    fp = open(filename, 'rb')
+    try:
+        os.unlink('inv.db')
+    except OSError:
+        pass
+    try:
+        os.unlink('parties.db')
+    except OSError:
+        pass
 
-    loaded = load(fp)
-    (_bottle_types_db, _inventory_db, _recipes_db) = loaded
+#    f1 = filename +'_inv.db'
+#    f2 = filename +'_parties.db'
 
-    fp.close()
+ #   os.unlink(f1)
+ #   os.unlink(f2)
+ #   shutil.copy(f1,'inv.db')
+ #   shutil.copy(f2,'parties.db')
+
+    db = sqlite3.connect('inv.db')
+    c = db.cursor()
+
+    pdb = sqlite3.connect('parties.db')
+    p = pdb.cursor()
+
+#    global _bottle_types_db, _inventory_db, _recipes_db
+#    fp = open(filename, 'rb')
+
+#    loaded = load(fp)
+#    (_bottle_types_db, _inventory_db, _recipes_db) = loaded
+
+ #   fp.close()
 
 # exceptions in Python inherit from Exception and generally don't need to
 # override any methods.
@@ -135,6 +164,14 @@ def get_liquor_inventory():
     inventory_db = c.fetchall()
     for (m, l,_) in inventory_db:
         yield m, l
+
+def get_bottle_types():
+    "Retrieve all liquor types in inventory, in tuple form: (mfg, liquor)."
+    c.execute('SELECT * FROM bottle_types')
+    bottle_types_db = c.fetchall()
+    for (m, l,t) in bottle_types_db:
+        yield m, l,t
+
 
 def show_liquor_amounts():
     "Print all the liquor types and amounts in the inventory. "
@@ -250,6 +287,14 @@ def get_party(HName):
         if HName == par[0]:
             return Party(par[2],par[0],par[1],par[3],par[4],cPickle.loads(str(par[5])),cPickle.loads(str(par[6])),cPickle.loads(str(par[7])))
     return 0
+
+def get_all_parties_list():
+    """returns all  parties"""
+    p.execute('SELECT * FROM parties')
+    parties_db = p.fetchall()
+    
+    for par in parties_db:
+        yield list(par[0],par[1],par[2],par[3],par[4],cPickle.loads(str(par[5])),cPickle.loads(str(par[6])),cPickle.loads(str(par[7])))
 
 def get_all_parties():
     """ returns the whole dictionary of recipes or a list of recipes"""

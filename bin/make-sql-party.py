@@ -11,4 +11,3 @@ p = db.cursor()
 
 p.execute('CREATE TABLE parties (HName TEXT,HNum TEXT, loc TEXT, date TEXT,crash INTEGER, inv TEXT, music TEXT, restu TEXT)')
 db.commit()
-

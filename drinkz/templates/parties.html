@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<ul>
+	{% for p in parties %}
+		<li> Hosted by {{ p[0] }}, on {{ p[4] }}.  </li>
+	{% endfor %}
+</ul>
+
+<span> Check out the party hosted by: </span>
+<form action="in_party">
+	<select name="name">
+	{% for p in parties %}
+		<option value="{{ p[0] }}">{{ p[0] }}</li>
+	{% endfor %}
+	</select>
+</form>
+
+{% endblock %}

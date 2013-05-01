@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<ul>
+	<li> Hosted by {{ p.HName }}, on {{ p.date] }}.  </li>
+	<li> Host num {{ p.HNum }}  </li>
+	<li> Party location: {{ p.loc }}  </li>
+	<li> # of crash spots: {{ p.crash }}  </li>
+	<li> Music:
+   		<ul>
+			{% for m in music %}
+			  	<li>m </li>
+			{% endfor %}
+		</ul>	
+	</li>
+	<li> Liquor:
+   		<ul>
+			{% for l in lqr %}
+			  	<li>l </li>
+			{% endfor %}
+		</ul>	
+	</li>
+
+	<li> Resturants:
+   		<ul>
+			{% for r in restu %}
+			  	<li>r </li>
+			{% endfor %}
+		</ul>	
+	</li>
+</ul>
+
+<span> Check out the party hosted by: </span>
+{% endblock %}
